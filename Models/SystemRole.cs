@@ -40,6 +40,14 @@ namespace OnlineMarket.API.Models
                 IdentityResult roleResult = roleManager.
                 CreateAsync(role).Result;
             }
+ 
+            if (!roleExists("Admin"))
+            {
+                IdentityRole role = new IdentityRole();
+                role.Name = "Admin";
+                IdentityResult roleResult = roleManager.
+                CreateAsync(role).Result;
+            }
         }
         private bool roleExists(string role){
             return roleManager.RoleExistsAsync(role).Result;

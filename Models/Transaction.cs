@@ -10,10 +10,11 @@ namespace OnlineMarket.API.Models
         public int Price { get; set; }
         public string Description { get; set; }
         public string Category { get; set; }
-        public ICollection<Image> Images { get; set; }
+        // Two methods card(stripe) and payment on delivery
         public string PaymentMethod { get; set; }
+        public string Status { get; set; }
+        public ICollection<Product> Products { get; set; }
         public SystemUser Buyer { get; set; }
-        public SystemUser Seller { get; set; }
         public Delivery Delivery { get; set; }
     }
 }
