@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OnlineMarket.Models\OnlineMarket.Models.csproj" />
+    <ProjectReference Include="..\OnlineMarket.Helpers\OnlineMarket.Helpers.csproj" />
+  </ItemGroup>
+
+</Project>
