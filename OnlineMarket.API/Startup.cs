@@ -5,12 +5,16 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using OnlineMarket.API.Installers;
+using OnlineMarket.DataAccess;
+using OnlineMarket.Models;
 
 namespace OnlineMarket.API
 {
@@ -27,15 +31,14 @@ namespace OnlineMarket.API
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.InstallServicesAssembly(Configuration);
+            services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "OnlineMarket.API", Version = "v1" });
-            });
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             if (env.IsDevelopment())
             {
@@ -49,6 +52,8 @@ namespace OnlineMarket.API
             app.UseRouting();
 
             app.UseAuthorization();
+
+            DataInitializer.SeedDatabase(userManager, roleManager).Wait();
 
             app.UseEndpoints(endpoints =>
             {

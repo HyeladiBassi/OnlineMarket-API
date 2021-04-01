@@ -15,7 +15,7 @@ namespace OnlineMarket.Models
         public ICollection<Image> Images { get; set; }
         public string PaymentMethod { get; set; }
         public SystemUser Seller { get; set; }
-        public Delivery Delivery { get; set; }
+        // public Delivery Delivery { get; set; }
         public ICollection<ProductReview> Reviews { get; set; }
 
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
 namespace OnlineMarket.Models
@@ -12,6 +13,6 @@ namespace OnlineMarket.Models
         public string Address { get; set; }
         public string ExtraDetails { get; set; }
         public Image ProfilePicture { get; set; }
-        public WishList WishList { get; set; }
+        public ICollection<Product> WishList { get; set; }
     }
 }

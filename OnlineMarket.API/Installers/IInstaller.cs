@@ -5,6 +5,6 @@ namespace OnlineMarket.API.Installers
 {
     public interface IInstaller
     {
-        void InstallServicesAssembly(IServiceCollection services, IConfiguration Configuration);
+        void InstallServicesAssembly(IServiceCollection services, IConfiguration configuration);
     }
 }

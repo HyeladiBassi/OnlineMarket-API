@@ -1,9 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\OnlineMarket.DataTransferObjects\OnlineMarket.DataTransferObjects.csproj" />
     <ProjectReference Include="..\OnlineMarket.DataAccess\OnlineMarket.DataAccess.csproj" />
     <ProjectReference Include="..\OnlineMarket.Models\OnlineMarket.Models.csproj" />
     <ProjectReference Include="..\OnlineMarket.Helpers\OnlineMarket.Helpers.csproj" />
+    <ProjectReference Include="..\OnlineMarket.Errors\OnlineMarket.Errors.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.9.0" />
   </ItemGroup>
 
   <PropertyGroup>
