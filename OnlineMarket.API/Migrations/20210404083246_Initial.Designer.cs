@@ -9,7 +9,7 @@ using OnlineMarket.DataAccess;
 namespace OnlineMarket.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210331213048_Initial")]
+    [Migration("20210404083246_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -159,24 +159,22 @@ namespace OnlineMarket.API.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Currency")
+                    b.Property<string>("Area")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("City")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ExtraDetails")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("RegionId")
-                        .HasColumnType("INTEGER");
+                    b.Property<double>("Price")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Type")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RegionId");
 
                     b.ToTable("Delivery");
                 });
@@ -212,13 +210,13 @@ namespace OnlineMarket.API.Migrations
                     b.Property<string>("Category")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Currency")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsApproved")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -227,8 +225,8 @@ namespace OnlineMarket.API.Migrations
                     b.Property<string>("PaymentMethod")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("INTEGER");
+                    b.Property<double>("Price")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("SellerId")
                         .HasColumnType("TEXT");
@@ -254,7 +252,13 @@ namespace OnlineMarket.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ProductId")
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Rating")
@@ -305,23 +309,6 @@ namespace OnlineMarket.API.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("OnlineMarket.Models.Region", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Area")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("City")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Region");
-                });
-
             modelBuilder.Entity("OnlineMarket.Models.SystemUser", b =>
                 {
                     b.Property<string>("Id")
@@ -331,6 +318,12 @@ namespace OnlineMarket.API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Area")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("City")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -352,6 +345,9 @@ namespace OnlineMarket.API.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastName")
                         .HasColumnType("TEXT");
@@ -382,9 +378,6 @@ namespace OnlineMarket.API.Migrations
                     b.Property<int?>("ProfilePictureId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("RegionId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
@@ -406,8 +399,6 @@ namespace OnlineMarket.API.Migrations
 
                     b.HasIndex("ProfilePictureId");
 
-                    b.HasIndex("RegionId");
-
                     b.ToTable("AspNetUsers");
                 });
 
@@ -420,7 +411,7 @@ namespace OnlineMarket.API.Migrations
                     b.Property<string>("BuyerId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Category")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Currency")
@@ -432,16 +423,19 @@ namespace OnlineMarket.API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("PaymentMethod")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("INTEGER");
+                    b.Property<double>("Price")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Status")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -504,15 +498,6 @@ namespace OnlineMarket.API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("OnlineMarket.Models.Delivery", b =>
-                {
-                    b.HasOne("OnlineMarket.Models.Region", "Region")
-                        .WithMany()
-                        .HasForeignKey("RegionId");
-
-                    b.Navigation("Region");
-                });
-
             modelBuilder.Entity("OnlineMarket.Models.Image", b =>
                 {
                     b.HasOne("OnlineMarket.Models.Product", null)
@@ -535,15 +520,15 @@ namespace OnlineMarket.API.Migrations
 
             modelBuilder.Entity("OnlineMarket.Models.ProductReview", b =>
                 {
-                    b.HasOne("OnlineMarket.Models.Product", "Product")
+                    b.HasOne("OnlineMarket.Models.Product", null)
                         .WithMany("Reviews")
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("OnlineMarket.Models.SystemUser", "Reviewer")
                         .WithMany()
                         .HasForeignKey("ReviewerId");
-
-                    b.Navigation("Product");
 
                     b.Navigation("Reviewer");
                 });
@@ -563,13 +548,7 @@ namespace OnlineMarket.API.Migrations
                         .WithMany()
                         .HasForeignKey("ProfilePictureId");
 
-                    b.HasOne("OnlineMarket.Models.Region", "Region")
-                        .WithMany()
-                        .HasForeignKey("RegionId");
-
                     b.Navigation("ProfilePicture");
-
-                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("OnlineMarket.Models.Transaction", b =>

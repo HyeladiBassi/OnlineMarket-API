@@ -1,43 +1,178 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using OnlineMarket.DataAccess;
 using OnlineMarket.DataTransferObjects.Product;
+using OnlineMarket.DataTransferObjects.ProductReview;
 using OnlineMarket.Helpers;
-using OnlineMarket.Helpers.ResourceParameters;
 using OnlineMarket.Models;
+using OnlineMarket.Services.Extensions;
 using OnlineMarket.Services.Interfaces;
 
 namespace OnlineMarket.Services.Main
 {
     public class ProductService : IProductService
     {
-        public async Task<Product> DeleteProduct(string productId)
+        private readonly DataContext _context;
+
+        public ProductService(DataContext context)
         {
-            throw new System.NotImplementedException();
+            _context = context;
         }
 
-        public async Task<PagedList<Product>> GetPagedProductList(ResourceParameters resourceParameters)
+        public async Task<bool> CreateProduct(Product createdProduct)
         {
-            throw new System.NotImplementedException();
+            await _context.Products.AddAsync(createdProduct);
+
+            return await Save();
         }
 
-        public async Task<Product> GetProductById(string productId)
+        public async Task<bool> DeleteProduct(int productId)
         {
-            throw new System.NotImplementedException();
+            Product product = await _context.Products
+                .FirstOrDefaultAsync(x => x.Id == productId);
+
+            product.IsDeleted = true;
+            _context.Update(product);
+
+            return await Save();
         }
 
-        public async Task<ICollection<Product>> GetProductList(ResourceParameters resourceParameters)
+        public async Task<PagedList<Product>> GetPagedProductList(ProductResourceParameters resourceParameters)
         {
-            throw new System.NotImplementedException();
+            PagedList<Product> products = await _context.Products.Where(x => x.IsApproved == false)
+                .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
+
+            return products;
         }
 
-        public async Task<ICollection<Product>> GetProductListByUserId(string userId)
+        public async Task<Product> GetProductById(int productId)
         {
-            throw new System.NotImplementedException();
+            Product product = await _context.Products
+                .AsNoTracking()
+                .Include(x => x.Seller)
+                .Where(x => !x.IsDeleted)
+                .Where(x => x.Id == productId)
+                .FirstOrDefaultAsync();
+
+            return product;
         }
 
-        public async Task<Product> UpdateProduct(string productId, ProductUpdateDto updatedProduct)
+        public async Task<IEnumerable<Product>> GetProductList(ProductResourceParameters resourceParameters)
         {
-            throw new System.NotImplementedException();
+            List<Product> productList = await _context.Products
+                .AsQueryable()
+                .WhereGtEq(x => x.Price, resourceParameters.priceGt)
+                .WhereLtEq(x => x.Price, resourceParameters.priceLt)
+                .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
+                .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
+                .ToListAsync();
+
+            return productList;
+        }
+
+        public async Task<PagedList<Product>> GetPagedProductListByUserId(string userId, ProductResourceParameters resourceParameters)
+        {
+            PagedList<Product> productList = await _context.Products
+                .AsQueryable()
+                .Where(x => x.Seller.Id == userId)
+                .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
+
+            return productList;
+        }
+
+        public async Task<IEnumerable<Product>> GetProductListByUserId(string userId)
+        {
+            List<Product> productList = await _context.Products
+                .AsQueryable()
+                .Where(x => x.Seller.Id == userId)
+                .ToListAsync();
+
+            return productList;
+        }
+
+        public async Task<Product> UpdateProduct(int productId, ProductUpdateDto updatedProduct)
+        {
+            Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
+
+            if (updatedProduct.Category != null)
+            {
+                product.Category = updatedProduct.Category;
+            }
+
+            if (updatedProduct.Description != null)
+            {
+                product.Description = updatedProduct.Description;
+            }
+
+            if (updatedProduct.Name != null)
+            {
+                product.Name = updatedProduct.Name;
+            }
+
+            if (updatedProduct.PaymentMethod != null)
+            {
+                product.PaymentMethod = updatedProduct.PaymentMethod;
+            }
+
+            if (updatedProduct.Price != product.Price)
+            {
+                product.Price = updatedProduct.Price;
+            }
+
+            if (updatedProduct.Stock != product.Stock)
+            {
+                product.Stock = updatedProduct.Stock;
+            }
+
+            _context.Products.Update(product);
+
+            if (await Save())
+            {
+                return product;
+            }
+            return null;
+        }
+
+        private async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> BuyProduct(int productId, int quantity)
+        {
+            Product product = await _context.Products
+                .Where(x => !x.IsDeleted)
+                .FirstOrDefaultAsync(x => x.Id == productId);
+
+            product.Stock = product.Stock - quantity;
+
+            _context.Products.Update(product);
+            return await Save();
+        }
+
+        public async Task<bool> CheckAvailability(int productId, int quantity)
+        {
+            Product product = await _context.Products
+                .AsNoTracking().
+                FirstOrDefaultAsync(x => x.Id == productId);
+            if (product.Stock > quantity)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> ProductExists(int productId)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
+            if (product != null)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

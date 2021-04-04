@@ -14,7 +14,6 @@ using OnlineMarket.Services.Interfaces;
 
 namespace OnlineMarket.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
@@ -28,6 +27,7 @@ namespace OnlineMarket.API.Controllers
             _signInManager = signInManager;
             _mapper = mapper;
         }
+
 
         /// <summary>
         /// Sign in

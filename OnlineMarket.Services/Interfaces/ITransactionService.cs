@@ -1,15 +1,18 @@
 using System.Threading.Tasks;
 using OnlineMarket.Models;
 using OnlineMarket.Helpers;
+using OnlineMarket.DataTransferObjects.Transaction;
+using System.Collections.Generic;
 
 namespace OnlineMarket.Services.Interfaces
 {
     public interface ITransactionService
     {
-        public Task<Transaction> GetTransactionById(int id);
-        public Task<PagedList<Transaction>> GetTransactionListByUserId(string userId);
-        public Task<Transaction> CreateTransaction(Transaction transaction);
-        public Task<Transaction> UpdateTransaction(int id, Transaction transaction);
-        public Task<Transaction> deleteTransaction(int id);
+        Task<PagedList<Transaction>> GetPagedTransactionsAsync();
+        Task<ICollection<Transaction>> GetTransactionListByUserId(string userId);
+        Task<Transaction> GetTransactionById(int id);
+        Task<Transaction> CreateTransaction(Transaction transaction);
+        Task<Transaction> UpdateTransaction(int id, TransactionUpdateDto transaction);
+        Task<Transaction> DeleteTransaction(int id);
     }
 }

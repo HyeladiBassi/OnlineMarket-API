@@ -36,6 +36,18 @@ namespace OnlineMarket.Errors
             return this;
         }
 
+        public ErrorBuilder<E> AddField(ModelStateDictionary modelState)
+        {
+            modelState.ToList().ForEach(x =>
+            {
+                x.Value
+                    .Errors
+                    .ToList()
+                    .ForEach(y => AddField(x.Key.Trim(new char[] { '$', '.' }), y.ErrorMessage));
+            });
+            return this;
+        }
+
         public ErrorBuilder<E> AddFields(ModelStateDictionary modelState)
         {
             modelState.ToList().ForEach(x =>

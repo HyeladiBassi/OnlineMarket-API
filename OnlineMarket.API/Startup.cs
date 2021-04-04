@@ -33,7 +33,6 @@ namespace OnlineMarket.API
 
             services.InstallServicesAssembly(Configuration);
             services.AddAutoMapper(typeof(Startup));
-            services.AddControllers();
             
         }
 

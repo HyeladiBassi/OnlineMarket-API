@@ -15,10 +15,14 @@ namespace OnlineMarket.API.Installers
         {
             services.AddScoped<IAuthHelper, AuthHelper>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IProductReviewService, ProductReviewService>();
+            services.AddScoped<IProductService, ProductService>();
             services.AddTransient<SystemRole>();
             MapperConfiguration mappingConfig = new MapperConfiguration(cfg => cfg.AddProfile(new ProfileMapping()));
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
+            services.AddControllers();
+
         }
     }
 }

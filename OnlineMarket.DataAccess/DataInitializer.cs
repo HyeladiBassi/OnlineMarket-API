@@ -28,7 +28,8 @@ namespace OnlineMarket.DataAccess
                 {
                     UserName = "admin",
                     EmailConfirmed = true,
-                    Email = "admin@email.com"
+                    Email = "admin@email.com",
+                    FirstName = "AdminFirstName"
                 };
                 await userManager.CreateAsync(admin, "adminpass!");
                 await userManager.AddToRoleAsync(admin, "admin");
