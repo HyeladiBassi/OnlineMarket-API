@@ -13,14 +13,27 @@ namespace OnlineMarket.API.Installers
     {
         public void InstallServicesAssembly(IServiceCollection services, IConfiguration configuration)
         {
+            #region Cors Policy
+
+            services.AddCors(options => options.AddPolicy("MarketPolicy",
+            builder =>
+            {
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            }));
+
+            #endregion
+
             services.AddScoped<IAuthHelper, AuthHelper>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IProductReviewService, ProductReviewService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddTransient<SystemRole>();
-            MapperConfiguration mappingConfig = new MapperConfiguration(cfg => cfg.AddProfile(new ProfileMapping()));
-            IMapper mapper = mappingConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            // MapperConfiguration mappingConfig = new MapperConfiguration(cfg => cfg.AddProfile(new ProfileMapping()));
+            // IMapper mapper = mappingConfig.CreateMapper();
+            // services.AddSingleton(mapper);
             services.AddControllers();
 
         }

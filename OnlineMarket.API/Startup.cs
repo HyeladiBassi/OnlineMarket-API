@@ -43,14 +43,18 @@ namespace OnlineMarket.API
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "OnlineMarket.API v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "OnlineMarket.API Version 1"));
             }
 
+            app.UseCors("MarketPolicy");
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
+
             app.UseAuthorization();
+
+            app.UseAuthentication();
 
             DataInitializer.SeedDatabase(userManager, roleManager).Wait();
 
