@@ -19,8 +19,16 @@ namespace OnlineMarket.DataAccess
                 Name = "admin",
                 NormalizedName = "ADMIN"
             };
+
+            SystemRole sellerRole = new SystemRole
+            {
+                Name = "seller",
+                NormalizedName = "SELLER"
+            };
+
             IdentityResult buyerResult = await roleManager.CreateAsync(buyerRole);
             IdentityResult adminResult = await roleManager.CreateAsync(adminRole);
+            IdentityResult sellerResult = await roleManager.CreateAsync(sellerRole);
 
             if (adminResult.Succeeded)
             {
@@ -47,6 +55,75 @@ namespace OnlineMarket.DataAccess
                 };
                 await userManager.CreateAsync(buyer, "buyerpass!");
                 await userManager.AddToRoleAsync(buyer, "buyer");
+            }
+
+            if (sellerResult.Succeeded)
+            {
+                SystemUser seller = new SystemUser
+                {
+                    UserName = "seller",
+                    EmailConfirmed = true,
+                    Email = "seller@email.com",
+                    FirstName = "Seller",
+                    LastName = "First"
+                };
+                await userManager.CreateAsync(seller, "sellerpass!");
+                await userManager.AddToRoleAsync(seller, "seller");
+
+                SystemUser seller1 = new SystemUser
+                {
+                    UserName = "amanda",
+                    EmailConfirmed = true,
+                    Email = "amanda@email.com",
+                    FirstName = "Amanda",
+                    LastName = "Wayne"
+                };
+                await userManager.CreateAsync(seller1, "sellerpass!");
+                await userManager.AddToRoleAsync(seller1, "seller");
+
+                SystemUser seller2 = new SystemUser
+                {
+                    UserName = "ross",
+                    EmailConfirmed = true,
+                    Email = "ross@email.com",
+                    FirstName = "Ross",
+                    LastName = "Geller"
+                };
+                await userManager.CreateAsync(seller2, "sellerpass!");
+                await userManager.AddToRoleAsync(seller2, "seller");
+
+                SystemUser seller3 = new SystemUser
+                {
+                    UserName = "phil",
+                    EmailConfirmed = true,
+                    Email = "phil@email.com",
+                    FirstName = "Phil",
+                    LastName = "Dunphy"
+                };
+                await userManager.CreateAsync(seller3, "sellerpass!");
+                await userManager.AddToRoleAsync(seller3, "seller");
+
+                SystemUser seller4 = new SystemUser
+                {
+                    UserName = "monica",
+                    EmailConfirmed = true,
+                    Email = "monica@email.com",
+                    FirstName = "Monica",
+                    LastName = "Geller"
+                };
+                await userManager.CreateAsync(seller4, "sellerpass!");
+                await userManager.AddToRoleAsync(seller4, "seller");
+
+                SystemUser seller5 = new SystemUser
+                {
+                    UserName = "claire",
+                    EmailConfirmed = true,
+                    Email = "claire@email.com",
+                    FirstName = "Claire",
+                    LastName = "Pritchet"
+                };
+                await userManager.CreateAsync(seller5, "sellerpass!");
+                await userManager.AddToRoleAsync(seller5, "seller");
             }
 
         }
