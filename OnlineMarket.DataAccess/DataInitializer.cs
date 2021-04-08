@@ -26,9 +26,16 @@ namespace OnlineMarket.DataAccess
                 NormalizedName = "SELLER"
             };
 
+            SystemRole modRole = new SystemRole
+            {
+                Name = "moderator",
+                NormalizedName = "MODERATOR"
+            };
+
             IdentityResult buyerResult = await roleManager.CreateAsync(buyerRole);
             IdentityResult adminResult = await roleManager.CreateAsync(adminRole);
             IdentityResult sellerResult = await roleManager.CreateAsync(sellerRole);
+            IdentityResult modResult = await roleManager.CreateAsync(modRole);
 
             if (adminResult.Succeeded)
             {
@@ -55,6 +62,21 @@ namespace OnlineMarket.DataAccess
                 };
                 await userManager.CreateAsync(buyer, "buyerpass!");
                 await userManager.AddToRoleAsync(buyer, "buyer");
+            }
+            
+
+            if (modResult.Succeeded)
+            {
+                SystemUser buyer = new SystemUser
+                {
+                    UserName = "moderator",
+                    EmailConfirmed = true,
+                    Email = "mod@email.com",
+                    FirstName = "Moderator",
+                    LastName = "First"
+                };
+                await userManager.CreateAsync(buyer, "modpass!");
+                await userManager.AddToRoleAsync(buyer, "moderator");
             }
 
             if (sellerResult.Succeeded)
