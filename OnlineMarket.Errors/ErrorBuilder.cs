@@ -8,7 +8,6 @@ namespace OnlineMarket.Errors
     {
         private E type;
         private string message;
-        private readonly ErrorTypes invalidRequest;
         private readonly ICollection<FieldError> fields;
 
         public ErrorBuilder(E type)
