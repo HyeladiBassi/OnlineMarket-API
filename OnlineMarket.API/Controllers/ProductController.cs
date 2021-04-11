@@ -5,9 +5,12 @@ using Hangfire;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using OnlineMarket.API.Extensions;
 using OnlineMarket.Contracts;
+using OnlineMarket.DataTransferObjects;
 using OnlineMarket.DataTransferObjects.Product;
 using OnlineMarket.Errors;
+using OnlineMarket.Helpers;
 using OnlineMarket.Models;
 using OnlineMarket.Services.Extensions;
 using OnlineMarket.Services.Interfaces;
@@ -30,12 +33,11 @@ namespace OnlineMarket.API.Controllers
 
 
         /// <summary>
-        /// Get list of products
+        /// Get paged list of products
         /// </summary>
-        /// <param name="parameters"></param>
         [HttpGet(ApiConstants.ProductRoutes.GetAllProducts)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(IEnumerable<Product>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProductList([FromQuery] ProductResourceParameters parameters)
         {
@@ -45,18 +47,46 @@ namespace OnlineMarket.API.Controllers
                 return StatusCode(403);
             }
 
+            PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
+            PagingDto paging = pagedProducts.ExtractPaging();
+
+            Paginate<ProductViewDto> result = new Paginate<ProductViewDto>
+            {
+                items = _mapper.Map<IEnumerable<ProductViewDto>>(pagedProducts),
+                pagingInfo = paging
+            };
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Get list of unapproved products
+        /// </summary>
+        [HttpGet(ApiConstants.ProductRoutes.UnapprovedProducts)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(IEnumerable<ProductViewDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetUnapprovedProducts([FromQuery] ProductResourceParameters parameters)
+        {
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return StatusCode(403);
+            }
+
             IEnumerable<Product> products = await _productService.GetProductList(parameters);
-            return Ok(products);
+            IEnumerable<ProductViewDto> productsView = _mapper.Map<IEnumerable<ProductViewDto>>(products);
+            
+            return Ok(productsView);
         }
 
 
         /// <summary>
         /// Get product by Id
         /// </summary>
-        /// <param name="id"></param>
         [HttpGet(ApiConstants.ProductRoutes.GetProductById)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProductById([FromParameter("id")] int id)
         {
@@ -72,17 +102,17 @@ namespace OnlineMarket.API.Controllers
             }
 
             Product product = await _productService.GetProductById(id);
-            return Ok(product);
+            ProductViewDto productView = _mapper.Map<ProductViewDto>(product);
+            return Ok(productView);
         }
 
 
         /// <summary>
         /// Create new product
         /// </summary>
-        /// <param name="createProductDto"></param>
         [HttpPost(ApiConstants.ProductRoutes.CreateProduct)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDto createProductDto)
         {
@@ -96,9 +126,10 @@ namespace OnlineMarket.API.Controllers
             Product product = _mapper.Map<Product>(createProductDto);
             product.Seller = await _userManager.FindByIdAsync(userId);
             bool result = await _productService.CreateProduct(product);
+            ProductViewDto productView = _mapper.Map<ProductViewDto>(product);
             if (result)
             {
-                return Ok(product);
+                return Ok(productView);
             }
             return BadRequest("Something went wrong!");
         }
@@ -107,8 +138,6 @@ namespace OnlineMarket.API.Controllers
         /// <summary>
         /// Puchase product
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="amount"></param>
         [HttpPost(ApiConstants.ProductRoutes.GetProductById)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -144,12 +173,10 @@ namespace OnlineMarket.API.Controllers
         /// <summary>
         /// Update product
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="updatedProductDto"></param>
         [HttpPut(ApiConstants.ProductRoutes.UpdateProduct)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateProduct([FromParameter("id")] int id, ProductUpdateDto updatedProductDto)
         {
             string userId = HttpContext.GetUserIdFromToken();
@@ -164,6 +191,32 @@ namespace OnlineMarket.API.Controllers
             }
 
             Product product = await _productService.UpdateProduct(id, updatedProductDto);
+            ProductViewDto productView = _mapper.Map<ProductViewDto>(product);
+            return Ok(productView);
+        }
+
+
+        /// <summary>
+        /// Approve product
+        /// </summary>
+        [HttpPut(ApiConstants.ProductRoutes.ApproveProduct)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ApproveProduct([FromParameter("id")] int id)
+        {
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return StatusCode(403);
+            }
+
+            if (!await _productService.ProductExists(id))
+            {
+                return NotFound("Product does not exist!");
+            }
+
+            var product = await _productService.ApproveProduct(id);
             return Ok(product);
         }
     }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AutoMapper;
 using OnlineMarket.DataTransferObjects.Authentication;
 using OnlineMarket.DataTransferObjects.Product;
+using OnlineMarket.DataTransferObjects.SystemUser;
 using OnlineMarket.Models;
 
 namespace OnlineMarket.API.MappingProfiles
@@ -12,6 +13,8 @@ namespace OnlineMarket.API.MappingProfiles
         {
             CreateMap<BuyerSignUpDto, SystemUser>();
             CreateMap<ProductCreateDto, Product>();
+
+            CreateMap<SystemUser, SystemUserViewDto>();
 
             CreateMap<Product, ProductViewDto>()
                 .ForMember(x => x.Name, map => map.MapFrom(x => x.Name))
