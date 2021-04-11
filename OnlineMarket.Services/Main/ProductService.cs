@@ -41,7 +41,14 @@ namespace OnlineMarket.Services.Main
 
         public async Task<PagedList<Product>> GetPagedProductList(ProductResourceParameters resourceParameters)
         {
-            PagedList<Product> products = await _context.Products.Where(x => x.IsApproved == false)
+            PagedList<Product> products = await _context.Products
+                .Include(x => x.Seller)
+                .Where(x => x.IsApproved)
+                .Where(x => !x.IsDeleted)
+                .WhereGtEq(x => x.Price, resourceParameters.priceGt)
+                .WhereLtEq(x => x.Price, resourceParameters.priceLt)
+                .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
+                .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
                 .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
 
             return products;
@@ -63,10 +70,8 @@ namespace OnlineMarket.Services.Main
         {
             List<Product> productList = await _context.Products
                 .AsQueryable()
-                .WhereGtEq(x => x.Price, resourceParameters.priceGt)
-                .WhereLtEq(x => x.Price, resourceParameters.priceLt)
-                .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
-                .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
+                .Include(x => x.Seller)
+                .Where(x => !x.IsApproved)
                 .ToListAsync();
 
             return productList;
@@ -167,12 +172,20 @@ namespace OnlineMarket.Services.Main
 
         public async Task<bool> ProductExists(int productId)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
+            Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
             if (product != null)
             {
                 return true;
             }
             return false;
+        }
+
+        public async Task<bool> ApproveProduct(int productId)
+        {
+            Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
+            product.IsApproved = true;
+            _context.Products.Update(product);
+            return await Save();
         }
     }
 }

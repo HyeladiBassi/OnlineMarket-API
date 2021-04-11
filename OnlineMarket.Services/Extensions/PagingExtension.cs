@@ -15,7 +15,8 @@ namespace OnlineMarket.Services.Extensions
             int count = await source.CountAsync();
 
             List<T> items = await source
-                .Skip((pageSize - 1) * pageNumber)
+                .AsQueryable()
+                .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
