@@ -37,7 +37,7 @@ namespace OnlineMarket.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager, DataContext context)
         {
             if (env.IsDevelopment())
             {
@@ -56,7 +56,7 @@ namespace OnlineMarket.API
 
             app.UseAuthentication();
 
-            DataInitializer.SeedDatabase(userManager, roleManager).Wait();
+            DataInitializer.SeedDatabase(userManager, roleManager, context).Wait();
 
             app.UseEndpoints(endpoints =>
             {

@@ -17,13 +17,14 @@ namespace OnlineMarket.Contracts
         {
             public const string Base = BaseUrl + Version + "product";
             public const string GetAllProducts = Base;
+            public const string GetUserProducts = Base + "/user";
             public const string UnapprovedProducts = Base + "/unapproved";
             public const string GetProductById = Base + "/{id}";
             public const string CreateProduct = Base;
             public const string UpdateProduct = Base + "/{id}";
             public const string ApproveProduct = Base + "/{id}/approve";
             public const string DeleteProduct = Base + "/{id}";
-            
+
         }
         public static class TransactionRoutes
         {

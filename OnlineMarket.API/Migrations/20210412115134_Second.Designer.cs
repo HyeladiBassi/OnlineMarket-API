@@ -9,8 +9,8 @@ using OnlineMarket.DataAccess;
 namespace OnlineMarket.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210404083246_Initial")]
-    partial class Initial
+    [Migration("20210412115134_Second")]
+    partial class Second
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -168,6 +168,9 @@ namespace OnlineMarket.API.Migrations
                     b.Property<string>("ExtraDetails")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("TEXT");
+
                     b.Property<double>("Price")
                         .HasColumnType("REAL");
 
@@ -208,6 +211,9 @@ namespace OnlineMarket.API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Category")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Currency")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
@@ -426,9 +432,6 @@ namespace OnlineMarket.API.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("PaymentMethod")
-                        .HasColumnType("TEXT");
-
                     b.Property<double>("Price")
                         .HasColumnType("REAL");
 
@@ -508,7 +511,7 @@ namespace OnlineMarket.API.Migrations
             modelBuilder.Entity("OnlineMarket.Models.Product", b =>
                 {
                     b.HasOne("OnlineMarket.Models.SystemUser", "Seller")
-                        .WithMany("WishList")
+                        .WithMany()
                         .HasForeignKey("SellerId");
 
                     b.HasOne("OnlineMarket.Models.Transaction", null)
@@ -571,11 +574,6 @@ namespace OnlineMarket.API.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("Reviews");
-                });
-
-            modelBuilder.Entity("OnlineMarket.Models.SystemUser", b =>
-                {
-                    b.Navigation("WishList");
                 });
 
             modelBuilder.Entity("OnlineMarket.Models.Transaction", b =>

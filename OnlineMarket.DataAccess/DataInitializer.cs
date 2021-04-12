@@ -6,7 +6,7 @@ namespace OnlineMarket.DataAccess
 {
     public class DataInitializer
     {
-        public static async Task SeedDatabase(UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task SeedDatabase(UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager, DataContext context)
         {
             SystemRole buyerRole = new SystemRole
             {
@@ -63,7 +63,7 @@ namespace OnlineMarket.DataAccess
                 await userManager.CreateAsync(buyer, "buyerpass!");
                 await userManager.AddToRoleAsync(buyer, "buyer");
             }
-            
+
 
             if (modResult.Succeeded)
             {
@@ -89,8 +89,23 @@ namespace OnlineMarket.DataAccess
                     FirstName = "Seller",
                     LastName = "First"
                 };
+
                 await userManager.CreateAsync(seller, "sellerpass!");
                 await userManager.AddToRoleAsync(seller, "seller");
+                Product sample1 = new Product
+                {
+                    Id = 15,
+                    Name = "Sample Product",
+                    Currency = "USD",
+                    Price = 500,
+                    Stock = 50,
+                    Description = "Sample description",
+                    Category = "Technology",
+                    PaymentMethod = "Cash",
+                    Seller = seller
+                };
+                await context.Products.AddAsync(sample1);
+                await context.SaveChangesAsync();
 
                 SystemUser seller1 = new SystemUser
                 {
@@ -147,6 +162,7 @@ namespace OnlineMarket.DataAccess
                 await userManager.CreateAsync(seller5, "sellerpass!");
                 await userManager.AddToRoleAsync(seller5, "seller");
             }
+
 
         }
     }

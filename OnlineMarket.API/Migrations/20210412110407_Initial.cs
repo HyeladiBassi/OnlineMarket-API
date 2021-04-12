@@ -31,6 +31,7 @@ namespace OnlineMarket.API.Migrations
                     Area = table.Column<string>(type: "TEXT", nullable: true),
                     Address = table.Column<string>(type: "TEXT", nullable: true),
                     ExtraDetails = table.Column<string>(type: "TEXT", nullable: true),
+                    PaymentMethod = table.Column<string>(type: "TEXT", nullable: true),
                     Price = table.Column<double>(type: "REAL", nullable: false),
                     Type = table.Column<string>(type: "TEXT", nullable: true)
                 },
@@ -128,6 +129,7 @@ namespace OnlineMarket.API.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Currency = table.Column<string>(type: "TEXT", nullable: true),
                     Price = table.Column<double>(type: "REAL", nullable: false),
                     Stock = table.Column<int>(type: "INTEGER", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
@@ -266,7 +268,6 @@ namespace OnlineMarket.API.Migrations
                     Currency = table.Column<string>(type: "TEXT", nullable: true),
                     Price = table.Column<double>(type: "REAL", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
-                    PaymentMethod = table.Column<string>(type: "TEXT", nullable: true),
                     Status = table.Column<string>(type: "TEXT", nullable: true),
                     BuyerId = table.Column<string>(type: "TEXT", nullable: true),
                     DeliveryId = table.Column<int>(type: "INTEGER", nullable: true),
