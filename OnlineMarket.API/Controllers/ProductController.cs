@@ -58,6 +58,32 @@ namespace OnlineMarket.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get paged list of products by user Id
+        /// </summary>
+        [HttpGet(ApiConstants.ProductRoutes.GetUserProducts)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetProductListByUserId([FromParameter("id")] string id, [FromQuery] ProductResourceParameters parameters)
+        {
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return StatusCode(403);
+            }
+
+            PagedList<Product> pagedProducts = await _productService.GetPagedProductListByUserId(id, parameters);
+            PagingDto paging = pagedProducts.ExtractPaging();
+
+            Paginate<ProductViewDto> result = new Paginate<ProductViewDto>
+            {
+                items = _mapper.Map<IEnumerable<ProductViewDto>>(pagedProducts),
+                pagingInfo = paging
+            };
+            return Ok(result);
+        }
+
 
         /// <summary>
         /// Get list of unapproved products
