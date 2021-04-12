@@ -12,7 +12,7 @@ namespace OnlineMarket.Services.Interfaces
         Task<PagedList<Transaction>> GetPagedTransactionList(TransactionResourceParameters parameters);
         Task<ICollection<Transaction>> GetTransactionListByUserId(string userId);
         Task<Transaction> GetTransactionById(int id);
-        Task<Transaction> CreateTransaction(Transaction transaction);
+        Task<Transaction> CreateTransaction(TransactionCreateDto transaction,ICollection<Product> products, string userId);
         Task<Transaction> UpdateTransaction(int id, TransactionUpdateDto transaction);
         Task<Transaction> DeleteTransaction(int id);
     }

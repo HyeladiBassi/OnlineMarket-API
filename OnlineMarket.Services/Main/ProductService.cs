@@ -82,6 +82,11 @@ namespace OnlineMarket.Services.Main
             PagedList<Product> productList = await _context.Products
                 .AsQueryable()
                 .Where(x => x.Seller.Id == userId)
+                .Where(x => !x.IsDeleted)
+                .WhereGtEq(x => x.Price, resourceParameters.priceGt)
+                .WhereLtEq(x => x.Price, resourceParameters.priceLt)
+                .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
+                .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
                 .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
 
             return productList;
