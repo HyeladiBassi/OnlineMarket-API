@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -36,16 +37,10 @@ namespace OnlineMarket.API.Controllers
         /// Get paged list of products
         /// </summary>
         [HttpGet(ApiConstants.ProductRoutes.GetAllProducts)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProductList([FromQuery] ProductResourceParameters parameters)
         {
-            string userId = HttpContext.GetUserIdFromToken();
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return StatusCode(403);
-            }
 
             PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
             PagingDto paging = pagedProducts.ExtractPaging();
@@ -62,17 +57,10 @@ namespace OnlineMarket.API.Controllers
         /// Get paged list of products by user Id
         /// </summary>
         [HttpGet(ApiConstants.ProductRoutes.GetUserProducts)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProductListByUserId([FromParameter("id")] string id, [FromQuery] ProductResourceParameters parameters)
         {
-            string userId = HttpContext.GetUserIdFromToken();
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return StatusCode(403);
-            }
-
             PagedList<Product> pagedProducts = await _productService.GetPagedProductListByUserId(id, parameters);
             PagingDto paging = pagedProducts.ExtractPaging();
 
@@ -111,17 +99,10 @@ namespace OnlineMarket.API.Controllers
         /// Get product by Id
         /// </summary>
         [HttpGet(ApiConstants.ProductRoutes.GetProductById)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProductById([FromParameter("id")] int id)
         {
-            string userId = HttpContext.GetUserIdFromToken();
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return StatusCode(403);
-            }
-
             if (!await _productService.ProductExists(id))
             {
                 return BadRequest("Product does not exist!");
