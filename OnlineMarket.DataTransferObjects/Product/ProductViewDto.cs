@@ -17,5 +17,6 @@ namespace OnlineMarket.DataTransferObjects.Product
         public string Category { get; set; }
         public string PaymentMethod { get; set; }
         public SystemUserViewDto Seller { get; set; }
+        public IEnumerable<ProductReviewViewDto> Reviews { get; set; }
     }
 }

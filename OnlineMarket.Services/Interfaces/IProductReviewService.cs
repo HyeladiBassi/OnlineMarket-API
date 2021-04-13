@@ -13,5 +13,6 @@ namespace OnlineMarket.Services.Interfaces
          Task<bool> AddProductReview(int productId, ProductReview review);
          Task<bool> UpdateProductReview(int reviewId,ProductReviewUpdateDto review);
          Task<bool> DeleteProductReview(int productId, int reveiwId);
+        //  Task<bool> IsBuyer(int productId, int userId);
     }
 }

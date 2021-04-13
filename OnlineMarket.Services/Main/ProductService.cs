@@ -59,6 +59,7 @@ namespace OnlineMarket.Services.Main
             Product product = await _context.Products
                 .AsNoTracking()
                 .Include(x => x.Seller)
+                .Include(x => x.Reviews)
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Id == productId)
                 .FirstOrDefaultAsync();

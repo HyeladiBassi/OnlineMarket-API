@@ -26,6 +26,15 @@ namespace OnlineMarket.Contracts
             public const string DeleteProduct = Base + "/{id}";
 
         }
+
+        public static class ProductReviewRoutes
+        {
+            public const string Base = BaseUrl + Version + "{id}/reviews" ;
+            public const string GetReviewsByProductId = Base ;
+            public const string CreateProductReview = Base ;
+            public const string UpdateProductReview = Base ;
+
+        }
         public static class TransactionRoutes
         {
             public const string Base = BaseUrl + Version + "transaction";

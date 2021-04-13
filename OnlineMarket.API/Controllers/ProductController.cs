@@ -38,7 +38,6 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpGet(ApiConstants.ProductRoutes.GetAllProducts)]
         [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProductList([FromQuery] ProductResourceParameters parameters)
         {
 
@@ -58,7 +57,6 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpGet(ApiConstants.ProductRoutes.GetUserProducts)]
         [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProductListByUserId([FromParameter("id")] string id, [FromQuery] ProductResourceParameters parameters)
         {
             PagedList<Product> pagedProducts = await _productService.GetPagedProductListByUserId(id, parameters);
@@ -79,7 +77,6 @@ namespace OnlineMarket.API.Controllers
         [HttpGet(ApiConstants.ProductRoutes.UnapprovedProducts)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(IEnumerable<ProductViewDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetUnapprovedProducts([FromQuery] ProductResourceParameters parameters)
         {
             string userId = HttpContext.GetUserIdFromToken();
@@ -90,7 +87,7 @@ namespace OnlineMarket.API.Controllers
 
             IEnumerable<Product> products = await _productService.GetProductList(parameters);
             IEnumerable<ProductViewDto> productsView = _mapper.Map<IEnumerable<ProductViewDto>>(products);
-            
+
             return Ok(productsView);
         }
 
@@ -100,12 +97,16 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpGet(ApiConstants.ProductRoutes.GetProductById)]
         [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetProductById([FromParameter("id")] int id)
         {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
             if (!await _productService.ProductExists(id))
             {
-                return BadRequest("Product does not exist!");
+                return NotFound(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Product does not exist!")
+                    .Build());
             }
 
             Product product = await _productService.GetProductById(id);
@@ -147,11 +148,12 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpPost(ApiConstants.ProductRoutes.GetProductById)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>),StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PurchaseProduct([FromParameter("id")] int id, [FromQuery] int amount)
         {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -160,12 +162,18 @@ namespace OnlineMarket.API.Controllers
 
             if (!await _productService.ProductExists(id))
             {
-                return NotFound("Product does not exist!");
+                return NotFound(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Product does not exist")
+                    .Build());
             }
 
             if (!await _productService.CheckAvailability(id, amount))
             {
-                return BadRequest("Not enough stock to complete purchase");
+                return BadRequest(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Not enough stock to complete purchase")
+                    .Build());
             }
 
             if (await _productService.BuyProduct(id, amount))
@@ -182,10 +190,11 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpPut(ApiConstants.ProductRoutes.UpdateProduct)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateProduct([FromParameter("id")] int id, ProductUpdateDto updatedProductDto)
         {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -194,7 +203,10 @@ namespace OnlineMarket.API.Controllers
 
             if (!await _productService.ProductExists(id))
             {
-                return NotFound("Product does not exist!");
+                return NotFound(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Product does not exist")
+                    .Build());
             }
 
             Product product = await _productService.UpdateProduct(id, updatedProductDto);
@@ -208,10 +220,11 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpPut(ApiConstants.ProductRoutes.ApproveProduct)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> ApproveProduct([FromParameter("id")] int id)
         {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -220,7 +233,10 @@ namespace OnlineMarket.API.Controllers
 
             if (!await _productService.ProductExists(id))
             {
-                return NotFound("Product does not exist!");
+                return NotFound(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Product does not exist")
+                    .Build());
             }
 
             var product = await _productService.ApproveProduct(id);
