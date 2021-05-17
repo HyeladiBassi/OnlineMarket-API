@@ -19,6 +19,7 @@ namespace OnlineMarket.Contracts
             public const string GetAllProducts = Base;
             public const string GetUserProducts = Base + "/user";
             public const string UnapprovedProducts = Base + "/unapproved";
+            public const string RejectedProducts = Base + "/rejected";
             public const string GetProductById = Base + "/{id}";
             public const string CreateProduct = Base;
             public const string UpdateProduct = Base + "/{id}";

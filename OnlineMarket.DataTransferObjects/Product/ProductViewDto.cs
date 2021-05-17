@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using OnlineMarket.DataTransferObjects.Media;
 using OnlineMarket.DataTransferObjects.ProductReview;
 using OnlineMarket.DataTransferObjects.SystemUser;
 
@@ -18,5 +19,6 @@ namespace OnlineMarket.DataTransferObjects.Product
         public string PaymentMethod { get; set; }
         public SystemUserViewDto Seller { get; set; }
         public IEnumerable<ProductReviewViewDto> Reviews { get; set; }
+        public IEnumerable<MediaViewDto> Images { get; set; }
     }
 }
