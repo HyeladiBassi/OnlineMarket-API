@@ -44,7 +44,7 @@ namespace OnlineMarket.Services.Main
         {
             PagedList<Product> products = await _context.Products
                 .Include(x => x.Seller)
-                .Where(x => x.Status == resourceParameters.status)
+                .Where(x => x.Status == "approved")
                 .Where(x => !x.IsDeleted)
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
