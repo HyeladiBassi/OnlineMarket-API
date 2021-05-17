@@ -23,6 +23,7 @@ namespace OnlineMarket.Services.Main
 
         public async Task<bool> CreateProduct(Product createdProduct)
         {
+
             await _context.Products.AddAsync(createdProduct);
 
             return await Save();
@@ -43,7 +44,7 @@ namespace OnlineMarket.Services.Main
         {
             PagedList<Product> products = await _context.Products
                 .Include(x => x.Seller)
-                .Where(x => x.IsApproved)
+                .Where(x => x.Status == resourceParameters.status)
                 .Where(x => !x.IsDeleted)
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
@@ -60,6 +61,7 @@ namespace OnlineMarket.Services.Main
                 .AsNoTracking()
                 .Include(x => x.Seller)
                 .Include(x => x.Reviews)
+                .Include(x => x.Images)
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Id == productId)
                 .FirstOrDefaultAsync();
@@ -72,7 +74,29 @@ namespace OnlineMarket.Services.Main
             List<Product> productList = await _context.Products
                 .AsQueryable()
                 .Include(x => x.Seller)
-                .Where(x => !x.IsApproved)
+                .Where(x => x.Status == "approved")
+                .ToListAsync();
+
+            return productList;
+        }
+
+        public async Task<IEnumerable<Product>> GetRejectedProductList(ProductResourceParameters resourceParameters)
+        {
+            List<Product> productList = await _context.Products
+                .AsQueryable()
+                .Include(x => x.Seller)
+                .Where(x => x.Status == "rejected")
+                .ToListAsync();
+
+            return productList;
+        }
+
+        public async Task<IEnumerable<Product>> GetUnapprovedProductList(ProductResourceParameters resourceParameters)
+        {
+            List<Product> productList = await _context.Products
+                .AsQueryable()
+                .Include(x => x.Seller)
+                .Where(x => x.Status == "pending")
                 .ToListAsync();
 
             return productList;
@@ -186,10 +210,15 @@ namespace OnlineMarket.Services.Main
             return false;
         }
 
-        public async Task<bool> ApproveProduct(int productId)
+        public async Task<bool> ApproveProduct(int productId, bool approval)
         {
             Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
-            product.IsApproved = true;
+            if (approval)
+            {
+                product.Status = "approved";
+            } else {
+                product.Status  = "rejected";
+            }
             _context.Products.Update(product);
             return await Save();
         }

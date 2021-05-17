@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OnlineMarket.API.MappingProfiles;
+using OnlineMarket.Helpers.FileHelper;
 using OnlineMarket.Models;
 using OnlineMarket.Services.AuthHelper;
 using OnlineMarket.Services.Interfaces;
@@ -27,6 +28,7 @@ namespace OnlineMarket.API.Installers
             #endregion
 
             services.AddScoped<IAuthHelper, AuthHelper>();
+            services.AddScoped<IFileHelper, FileHelper>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IProductReviewService, ProductReviewService>();
             services.AddScoped<IProductService, ProductService>();

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Hangfire;
@@ -12,6 +13,7 @@ using OnlineMarket.DataTransferObjects;
 using OnlineMarket.DataTransferObjects.Product;
 using OnlineMarket.Errors;
 using OnlineMarket.Helpers;
+using OnlineMarket.Helpers.FileHelper;
 using OnlineMarket.Models;
 using OnlineMarket.Services.Extensions;
 using OnlineMarket.Services.Interfaces;
@@ -23,13 +25,15 @@ namespace OnlineMarket.API.Controllers
     {
         private readonly IProductService _productService;
         private readonly UserManager<SystemUser> _userManager;
+        private readonly IFileHelper _fileHelper;
         private readonly IMapper _mapper;
 
-        public ProductController(IProductService productService, IMapper mapper, UserManager<SystemUser> userManager)
+        public ProductController(IProductService productService, IMapper mapper, UserManager<SystemUser> userManager, IFileHelper fileHelper)
         {
             _productService = productService;
             _mapper = mapper;
             _userManager = userManager;
+            _fileHelper = fileHelper;
         }
 
 
@@ -82,11 +86,50 @@ namespace OnlineMarket.API.Controllers
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return StatusCode(403);
+                return Forbid();
             }
 
-            IEnumerable<Product> products = await _productService.GetProductList(parameters);
+            IEnumerable<Product> products = await _productService.GetUnapprovedProductList(parameters);
             IEnumerable<ProductViewDto> productsView = _mapper.Map<IEnumerable<ProductViewDto>>(products);
+            
+            PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
+            PagingDto paging = pagedProducts.ExtractPaging();
+
+            Paginate<ProductViewDto> result = new Paginate<ProductViewDto>
+            {
+                items = _mapper.Map<IEnumerable<ProductViewDto>>(pagedProducts),
+                pagingInfo = paging
+            };
+
+            return Ok(productsView);
+        }
+
+
+        /// <summary>
+        /// Get list of rejected products
+        /// </summary>
+        [HttpGet(ApiConstants.ProductRoutes.RejectedProducts)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(IEnumerable<ProductViewDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetRejectedProducts([FromQuery] ProductResourceParameters parameters)
+        {
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Forbid();
+            }
+
+            IEnumerable<Product> products = await _productService.GetRejectedProductList(parameters);
+            IEnumerable<ProductViewDto> productsView = _mapper.Map<IEnumerable<ProductViewDto>>(products);
+            
+            PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
+            PagingDto paging = pagedProducts.ExtractPaging();
+
+            Paginate<ProductViewDto> result = new Paginate<ProductViewDto>
+            {
+                items = _mapper.Map<IEnumerable<ProductViewDto>>(pagedProducts),
+                pagingInfo = paging
+            };
 
             return Ok(productsView);
         }
@@ -118,20 +161,38 @@ namespace OnlineMarket.API.Controllers
         /// <summary>
         /// Create new product
         /// </summary>
+        /// <response code="200">
+        /// Successfully created a product
+        /// </response>
+        /// <response code="400">
+        /// Something went wrong
+        /// </response>
+        /// <response code="403">
+        /// Unauthorized
+        /// </response>
         [HttpPost(ApiConstants.ProductRoutes.CreateProduct)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDto createProductDto)
+        public async Task<IActionResult> CreateProduct([FromForm] ProductCreateDto createProductDto)
         {
 
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return StatusCode(403);
+                return Forbid();
             }
 
             Product product = _mapper.Map<Product>(createProductDto);
+
+            if (createProductDto.imageFiles != null && createProductDto.imageFiles.Count() > 0)
+            {
+                SaveFileResult[] mediaFiles = await Task.WhenAll(createProductDto.imageFiles.Select(x => _fileHelper.SaveFile(x)));
+                List<Image> images = mediaFiles.Select(x => new Image() { Link = $"/{x.fileName.Replace('\\', '/')}", Type = x.type, MimeType = x.mimeType }).ToList();
+                images[0].IsMain = true;
+                product.Images = images;
+            }
+
             product.Seller = await _userManager.FindByIdAsync(userId);
             bool result = await _productService.CreateProduct(product);
             ProductViewDto productView = _mapper.Map<ProductViewDto>(product);
@@ -146,6 +207,18 @@ namespace OnlineMarket.API.Controllers
         /// <summary>
         /// Puchase product
         /// </summary>
+        /// <response code="200">
+        /// Successfully purchased product
+        /// </response>
+        /// <response code="400">
+        /// Not enough stock to complete purchase
+        /// </response>
+        /// <response code="403">
+        /// Unauthorized
+        /// </response>
+        /// <response code="404">
+        /// Product not found
+        /// </response>
         [HttpPost(ApiConstants.ProductRoutes.GetProductById)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
@@ -157,7 +230,7 @@ namespace OnlineMarket.API.Controllers
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return StatusCode(403);
+                return Forbid();
             }
 
             if (!await _productService.ProductExists(id))
@@ -198,7 +271,7 @@ namespace OnlineMarket.API.Controllers
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return StatusCode(403);
+                return Forbid();
             }
 
             if (!await _productService.ProductExists(id))
@@ -222,13 +295,13 @@ namespace OnlineMarket.API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> ApproveProduct([FromParameter("id")] int id)
+        public async Task<IActionResult> ApproveProduct([FromParameter("id")] int id, [FromQuery] bool approval)
         {
             ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return StatusCode(403);
+                return Forbid();
             }
 
             if (!await _productService.ProductExists(id))
@@ -239,7 +312,7 @@ namespace OnlineMarket.API.Controllers
                     .Build());
             }
 
-            var product = await _productService.ApproveProduct(id);
+            var product = await _productService.ApproveProduct(id, approval);
             return Ok(product);
         }
     }
