@@ -133,7 +133,7 @@ namespace OnlineMarket.API.Migrations
                     Price = table.Column<double>(type: "REAL", nullable: false),
                     Stock = table.Column<int>(type: "INTEGER", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
-                    IsApproved = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Status = table.Column<string>(type: "TEXT", nullable: true),
                     Category = table.Column<string>(type: "TEXT", nullable: true),
                     PaymentMethod = table.Column<string>(type: "TEXT", nullable: true),
                     SellerId = table.Column<string>(type: "TEXT", nullable: true),
@@ -151,8 +151,10 @@ namespace OnlineMarket.API.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Type = table.Column<string>(type: "TEXT", nullable: true),
                     MimeType = table.Column<string>(type: "TEXT", nullable: true),
                     Link = table.Column<string>(type: "TEXT", nullable: true),
+                    IsMain = table.Column<bool>(type: "INTEGER", nullable: false),
                     ProductId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
@@ -240,7 +242,8 @@ namespace OnlineMarket.API.Migrations
                     Rating = table.Column<int>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ReviewerId = table.Column<string>(type: "TEXT", nullable: true)
+                    ReviewerId = table.Column<string>(type: "TEXT", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -49,6 +49,9 @@ namespace OnlineMarket.API
             app.UseCors("MarketPolicy");
             app.UseHttpsRedirection();
 
+            app.UseStaticFiles();
+            app.UseDefaultFiles();
+            
             app.UseRouting();
 
 

@@ -9,8 +9,8 @@ using OnlineMarket.DataAccess;
 namespace OnlineMarket.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210412115134_Second")]
-    partial class Second
+    [Migration("20210517140346_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -188,6 +188,9 @@ namespace OnlineMarket.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Link")
                         .HasColumnType("TEXT");
 
@@ -196,6 +199,9 @@ namespace OnlineMarket.API.Migrations
 
                     b.Property<int?>("ProductId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -219,9 +225,6 @@ namespace OnlineMarket.API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
@@ -235,6 +238,9 @@ namespace OnlineMarket.API.Migrations
                         .HasColumnType("REAL");
 
                     b.Property<string>("SellerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Stock")
@@ -263,6 +269,9 @@ namespace OnlineMarket.API.Migrations
 
                     b.Property<DateTime>("DateUpdated")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");

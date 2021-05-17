@@ -38,7 +38,7 @@ namespace OnlineMarket.API.Controllers
         public async Task<IActionResult> GetReviewsByProductId([FromParameter("id")] int id)
         {
 
-            IEnumerable<ProductReview> reviews = await _reviewService.GetProductReviewsById(id);
+            IEnumerable<ProductReview> reviews = await _reviewService.GetProductReviewsByProductId(id);
             IEnumerable<ProductReviewViewDto> mappedReviews = _mapper.Map<IEnumerable<ProductReviewViewDto>>(reviews);
             return Ok(mappedReviews);
         }
@@ -86,7 +86,7 @@ namespace OnlineMarket.API.Controllers
             {
                 return StatusCode(403);
             }
-            ProductReview review = await _reviewService.GetProductReview(id);
+            ProductReview review = await _reviewService.GetProductReviewById(id);
             if (review.Reviewer.Id != userId)
             {
                 return BadRequest(errorBuilder
