@@ -24,20 +24,29 @@ namespace OnlineMarket.Services.Main
             return await Save();
         }
 
-        public Task<bool> DeleteProductReview(int productId, int reveiwId)
+        public async Task<bool> DeleteProductReview(int reviewId)
         {
-            throw new System.NotImplementedException();
+            ProductReview review = await _context.Reviews.FirstOrDefaultAsync(x => x.Id == reviewId);
+            review.IsDeleted = true;
+            _context.Reviews.Update(review);
+            return await Save();
         }
 
-        public async Task<ProductReview> GetProductReview(int reviewId)
+        public async Task<ProductReview> GetProductReviewById(int reviewId)
         {
             ProductReview review = await _context.Reviews.FirstOrDefaultAsync(x => x.Id == reviewId);
             return review;
         }
 
-        public async Task<IEnumerable<ProductReview>> GetProductReviewsById(int productId)
+        public async Task<IEnumerable<ProductReview>> GetProductReviewsByProductId(int productId)
         {
             IEnumerable<ProductReview> reviews = await _context.Reviews.Where(x => x.ProductId == productId).ToListAsync();
+            return reviews;
+        }
+
+        public async Task<IEnumerable<ProductReview>> GetProductReviews()
+        {
+            IEnumerable<ProductReview> reviews = await _context.Reviews.ToListAsync();
             return reviews;
         }
 

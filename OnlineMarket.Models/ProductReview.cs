@@ -11,10 +11,12 @@ namespace OnlineMarket.Models
         public DateTime DateCreated { get; set; }
         public DateTime DateUpdated { get; set; }
         public SystemUser Reviewer { get; set; }
+        public bool IsDeleted { get; set; }
         public ProductReview()
         {
             DateCreated = DateTime.Now;
             DateUpdated = DateTime.Now;
+            IsDeleted = false;
         }
     }
 }
