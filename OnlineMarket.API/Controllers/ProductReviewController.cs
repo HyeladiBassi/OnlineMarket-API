@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using OnlineMarket.Contracts;
 using OnlineMarket.DataTransferObjects.ProductReview;
 using OnlineMarket.Errors;
+using OnlineMarket.Helpers.FileHelper;
 using OnlineMarket.Models;
 using OnlineMarket.Services.Extensions;
 using OnlineMarket.Services.Interfaces;
@@ -22,12 +23,14 @@ namespace OnlineMarket.API.Controllers
         private readonly IMapper _mapper;
         private readonly UserManager<SystemUser> _userManager;
         private readonly IProductReviewService _reviewService;
+        private readonly IFileHelper _fileHelper;
 
-        public ProductReviewController(IProductReviewService reviewService, IMapper mapper, UserManager<SystemUser> userManager)
+        public ProductReviewController(IProductReviewService reviewService, IMapper mapper, UserManager<SystemUser> userManager, IFileHelper fileHelper)
         {
             _mapper = mapper;
             _userManager = userManager;
             _reviewService = reviewService;
+            _fileHelper = fileHelper;
         }
 
         /// <summary>
@@ -50,7 +53,7 @@ namespace OnlineMarket.API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateProductReview([FromParameter("id")] int id, ProductReviewCreateDto createDto)
+        public async Task<IActionResult> CreateProductReview([FromParameter("id")] int id,[FromForm] ProductReviewCreateDto createDto)
         {
             ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
 
@@ -60,7 +63,16 @@ namespace OnlineMarket.API.Controllers
                 return StatusCode(403);
             }
             SystemUser user = await _userManager.FindByIdAsync(userId);
-            ProductReview productReview = _mapper.Map<ProductReview>(createDto);
+            ProductReview productReview = _mapper.Map<ProductReview>(createDto);            
+
+            if (createDto.imageFiles != null && createDto.imageFiles.Count() > 0)
+            {
+                SaveFileResult[] mediaFiles = await Task.WhenAll(createDto.imageFiles.Select(x => _fileHelper.SaveFile(x)));
+                List<Image> images = mediaFiles.Select(x => new Image() { Link = $"/{x.fileName.Replace('\\', '/')}", Type = x.type, MimeType = x.mimeType }).ToList();
+                images[0].IsMain = true;
+                productReview.Images = images;
+            }
+
             productReview.Reviewer = user;
             bool result = await _reviewService.AddProductReview(id, productReview);
             if (result)

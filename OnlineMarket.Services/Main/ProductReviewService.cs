@@ -21,6 +21,10 @@ namespace OnlineMarket.Services.Main
         {
             review.ProductId = productId;
             await _context.Reviews.AddAsync(review);
+            await Save();
+            Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
+            product.AverageRating = await CalculateRating(productId);
+            _context.Products.Update(product);
             return await Save();
         }
 
@@ -34,19 +38,19 @@ namespace OnlineMarket.Services.Main
 
         public async Task<ProductReview> GetProductReviewById(int reviewId)
         {
-            ProductReview review = await _context.Reviews.FirstOrDefaultAsync(x => x.Id == reviewId);
+            ProductReview review = await _context.Reviews.Include(x => x.Reviewer).FirstOrDefaultAsync(x => x.Id == reviewId);
             return review;
         }
 
         public async Task<IEnumerable<ProductReview>> GetProductReviewsByProductId(int productId)
         {
-            IEnumerable<ProductReview> reviews = await _context.Reviews.Where(x => x.ProductId == productId).ToListAsync();
+            IEnumerable<ProductReview> reviews = await _context.Reviews.Include(x => x.Reviewer).Where(x => x.ProductId == productId).ToListAsync();
             return reviews;
         }
 
         public async Task<IEnumerable<ProductReview>> GetProductReviews()
         {
-            IEnumerable<ProductReview> reviews = await _context.Reviews.ToListAsync();
+            IEnumerable<ProductReview> reviews = await _context.Reviews.Include(x => x.Reviewer).ToListAsync();
             return reviews;
         }
 
@@ -68,14 +72,31 @@ namespace OnlineMarket.Services.Main
             {
                 existingReview.Rating = updatedReview.Rating;
             }
-
             _context.Reviews.Update(existingReview);
+            await Save();
+
+            
+            Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == existingReview.ProductId);
+            product.AverageRating = await CalculateRating(existingReview.ProductId);
+            _context.Products.Update(product);
+
             return await Save();
         }
 
         private async Task<bool> Save()
         {
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        private async Task<double> CalculateRating(int productId)
+        {
+            var rating = 0.0;
+            List<ProductReview> result = await _context.Reviews.Where(x => x.ProductId == productId).ToListAsync();
+            foreach (ProductReview review in result)
+            {
+                rating += review.Rating;
+            }
+            return (rating/result.Count());
         }
     }
 }

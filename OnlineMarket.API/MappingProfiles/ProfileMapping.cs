@@ -30,13 +30,14 @@ namespace OnlineMarket.API.MappingProfiles
                 .ForMember(x => x.Description , map => map.MapFrom(x => x.Description))
                 .ForMember(x => x.Stock, map => map.MapFrom(x => x.Stock))
                 .ForMember(x => x.Category, map => map.MapFrom(x => x.Category))
-                .ForMember(x => x.Seller, map => map.MapFrom(x => x.Seller));
+                .ForMember(x => x.Seller, map => map.MapFrom(x => x.Seller))
+                .ForMember(x => x.AverageRating, map => map.MapFrom(x => x.AverageRating));
             #endregion
 
             #region Product Review
             CreateMap<ProductReviewCreateDto, ProductReview>();
             CreateMap<ProductReview, ProductReviewViewDto>()
-                .ForMember(x => x.ReviewerName, map => map.MapFrom(x => x.Reviewer.FirstName +" "+ x.Reviewer.LastName));
+                .ForMember(x => x.ReviewerName, map => map.MapFrom(x => x.Reviewer.FirstName));
             #endregion
 
             #region Images

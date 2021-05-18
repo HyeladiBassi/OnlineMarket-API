@@ -14,7 +14,7 @@ namespace OnlineMarket.Models
         public string Address { get; set; }
         public string ExtraDetails { get; set; }
         public Image ProfilePicture { get; set; }
-        // public ICollection<Product> WishList { get; set; }
+        public ICollection<Product> WishList { get; set; }
         public bool IsDeleted { get; set; }
     }
 }
