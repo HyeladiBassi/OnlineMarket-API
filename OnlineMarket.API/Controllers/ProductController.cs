@@ -224,7 +224,7 @@ namespace OnlineMarket.API.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>),StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PurchaseProduct([FromParameter("id")] int id, [FromQuery] int amount)
+        public async Task<IActionResult> PurchaseProduct([FromParameter("id")] int id, [FromQuery] int quantity)
         {
             ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
             string userId = HttpContext.GetUserIdFromToken();
@@ -241,7 +241,7 @@ namespace OnlineMarket.API.Controllers
                     .Build());
             }
 
-            if (!await _productService.CheckAvailability(id, amount))
+            if (!await _productService.CheckAvailability(id, quantity))
             {
                 return BadRequest(errorBuilder
                     .ChangeType(ErrorTypes.InvalidObjectId)
@@ -249,7 +249,7 @@ namespace OnlineMarket.API.Controllers
                     .Build());
             }
 
-            if (await _productService.BuyProduct(id, amount))
+            if (await _productService.BuyProduct(id, quantity))
             {
                 return Ok();
             }
