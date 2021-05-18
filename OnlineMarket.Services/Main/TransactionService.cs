@@ -21,8 +21,8 @@ namespace OnlineMarket.Services.Main
             _context = context;
             _userManager = userManager;
         }
-        public async Task<Transaction> CreateTransaction(TransactionCreateDto transactionDto,ICollection<Product> products, string userId)
-        {
+        // public async Task<Transaction> CreateTransaction(TransactionCreateDto transactionDto,ICollection<Product> products, string userId)
+        // {
             // SystemUser user = await _userManager.FindByIdAsync(userId);
             // Transaction transaction = new Transaction
             // {
@@ -32,8 +32,8 @@ namespace OnlineMarket.Services.Main
             //     Delivery = transactionDto.Delivery,
                 
             // };
-            return new Transaction();
-        }
+        //     return new Transaction();
+        // }
 
         public Task<Transaction> DeleteTransaction(int id)
         {
