@@ -40,8 +40,8 @@ namespace OnlineMarket.Contracts
             public const string GetReviewsByProductId = Base ;
             public const string GetReviewsByUserId = BaseUrl + Version + "{userId}/reviews" ;
             public const string CreateProductReview = Base ;
-            public const string UpdateProductReview = Base ;
-            public const string DeleteProductReview = Base ;
+            public const string UpdateProductReview = BaseUrl + Version + "reviews/{id}" ;
+            public const string DeleteProductReview = BaseUrl + Version + "reviews/{id}" ;
 
         }
         public static class TransactionRoutes

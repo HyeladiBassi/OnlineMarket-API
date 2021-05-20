@@ -75,7 +75,7 @@ namespace OnlineMarket.API.Controllers
         }
 
         /// <summary>
-        /// Get paged list of products by user Id
+        /// Get paged list of products by seller Id
         /// </summary>
         [HttpGet(ApiConstants.ProductRoutes.GetUserProducts)]
         [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]

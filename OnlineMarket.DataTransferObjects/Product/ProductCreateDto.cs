@@ -12,11 +12,5 @@ namespace OnlineMarket.DataTransferObjects.Product
         public string Description { get; set; }
         public string Category { get; set; }
         public IFormFileCollection imageFiles { get; set; }
-
-        public ProductCreateDto()
-        {
-            Currency = Currency.ToLower();
-            Category = Category.ToLower();
-        }
     }
 }

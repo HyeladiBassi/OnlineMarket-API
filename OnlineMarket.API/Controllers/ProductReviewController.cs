@@ -51,10 +51,10 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpGet(ApiConstants.ProductReviewRoutes.GetReviewsByUserId)]
         [ProducesResponseType(typeof(IEnumerable<ProductReviewViewDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetReviewsByUserId([FromParameter("userId")] string id)
+        public async Task<IActionResult> GetReviewsByUserId([FromParameter("userId")] string userId)
         {
 
-            IEnumerable<ProductReview> reviews = await _reviewService.GetProductReviewsByUserId(id);
+            IEnumerable<ProductReview> reviews = await _reviewService.GetProductReviewsByUserId(userId);
             IEnumerable<ProductReviewViewDto> mappedReviews = _mapper.Map<IEnumerable<ProductReviewViewDto>>(reviews);
             return Ok(mappedReviews);
         }
