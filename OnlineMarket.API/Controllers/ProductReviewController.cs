@@ -47,6 +47,19 @@ namespace OnlineMarket.API.Controllers
         }
 
         /// <summary>
+        /// Get list of reviews by user Id
+        /// </summary>
+        [HttpGet(ApiConstants.ProductReviewRoutes.GetReviewsByUserId)]
+        [ProducesResponseType(typeof(IEnumerable<ProductReviewViewDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetReviewsByUserId([FromParameter("userId")] string id)
+        {
+
+            IEnumerable<ProductReview> reviews = await _reviewService.GetProductReviewsByUserId(id);
+            IEnumerable<ProductReviewViewDto> mappedReviews = _mapper.Map<IEnumerable<ProductReviewViewDto>>(reviews);
+            return Ok(mappedReviews);
+        }
+
+        /// <summary>
         /// Create a product review
         /// </summary>
         [HttpPost(ApiConstants.ProductReviewRoutes.CreateProductReview)]
@@ -107,6 +120,38 @@ namespace OnlineMarket.API.Controllers
                     .Build());
             }
             bool result = await _reviewService.UpdateProductReview(id, updateDto);
+            if (result)
+            {
+                return Ok();
+            }
+            return BadRequest("Something went wrong");
+        }
+
+        /// <summary>
+        /// Delete product review using review id
+        /// </summary>
+        [HttpDelete(ApiConstants.ProductReviewRoutes.DeleteProductReview)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteProductReview([FromParameter("id")] int id)
+        {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
+
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return StatusCode(403);
+            }
+            ProductReview review = await _reviewService.GetProductReviewById(id);
+            if (review.Reviewer.Id != userId)
+            {
+                return BadRequest(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("You can only delete your reviews!")
+                    .Build());
+            }
+            bool result = await _reviewService.DeleteProductReview(id);
             if (result)
             {
                 return Ok();

@@ -101,7 +101,6 @@ namespace OnlineMarket.DataAccess
                     Stock = 50,
                     Description = "Sample description",
                     Category = "Technology",
-                    PaymentMethod = "Cash",
                     Seller = seller
                 };
                 await context.Products.AddAsync(sample1);

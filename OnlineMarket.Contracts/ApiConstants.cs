@@ -25,6 +25,12 @@ namespace OnlineMarket.Contracts
             public const string UpdateProduct = Base + "/{id}";
             public const string ApproveProduct = Base + "/{id}/approve";
             public const string DeleteProduct = Base + "/{id}";
+            public const string MakeMain = Base + "/{id}/media/{imageId}";
+            public const string DeleteImage = Base + "/{id}/media/{imageId}";
+            public const string GetCategories = Base + "categories";
+            public const string AddCategory = Base + "category";
+            public const string UpdateCategory = Base + "category/{id}";
+            public const string DeleteCategory = Base + "category/{id}";
 
         }
 
@@ -32,13 +38,15 @@ namespace OnlineMarket.Contracts
         {
             public const string Base = BaseUrl + Version + "{id}/reviews" ;
             public const string GetReviewsByProductId = Base ;
+            public const string GetReviewsByUserId = BaseUrl + Version + "{userId}/reviews" ;
             public const string CreateProductReview = Base ;
             public const string UpdateProductReview = Base ;
+            public const string DeleteProductReview = Base ;
 
         }
         public static class TransactionRoutes
         {
-            public const string Base = BaseUrl + Version + "transaction";
+            public const string Base = BaseUrl + Version + "transactions";
             public const string GetAllTransactions = Base;
             public const string GetTransactionById = Base + "/{id}";
             public const string CreateTransaction = Base;

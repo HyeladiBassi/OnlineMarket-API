@@ -25,9 +25,9 @@ namespace OnlineMarket.API.MappingProfiles
             CreateMap<ProductCreateDto, Product>();
             CreateMap<Product, ProductViewDto>()
                 .ForMember(x => x.Name, map => map.MapFrom(x => x.Name))
-                .ForMember(x => x.PaymentMethod, map => map.MapFrom(x => x.PaymentMethod))
                 .ForMember(x => x.Price, map => map.MapFrom(x => x.Price))
                 .ForMember(x => x.Description , map => map.MapFrom(x => x.Description))
+                .ForMember(x => x.WarehouseLocation, map => map.MapFrom(x => x.WarehouseLocation))
                 .ForMember(x => x.Stock, map => map.MapFrom(x => x.Stock))
                 .ForMember(x => x.Category, map => map.MapFrom(x => x.Category))
                 .ForMember(x => x.Seller, map => map.MapFrom(x => x.Seller))
@@ -42,6 +42,8 @@ namespace OnlineMarket.API.MappingProfiles
 
             #region Images
             CreateMap<Image, MediaViewDto>()
+				.ForMember(x => x.Id, map => map.MapFrom(x => x.Id))
+				.ForMember(x => x.IsMain, map => map.MapFrom(x => x.IsMain))
 				.ForMember(x => x.Link, map => map.MapFrom(x => x.Link))
 				.ForMember(x => x.MimeType, map => map.MapFrom(x => x.MimeType))
 				.ForMember(x => x.Type, map => map.MapFrom(x => x.Type));

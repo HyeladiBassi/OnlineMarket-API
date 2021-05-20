@@ -45,15 +45,33 @@ namespace OnlineMarket.API.Controllers
         public async Task<IActionResult> GetProductList([FromQuery] ProductResourceParameters parameters)
         {
 
-            PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
-            PagingDto paging = pagedProducts.ExtractPaging();
-
-            Paginate<ProductViewDto> result = new Paginate<ProductViewDto>
+            switch (parameters.region)
             {
-                items = _mapper.Map<IEnumerable<ProductViewDto>>(pagedProducts),
-                pagingInfo = paging
-            };
-            return Ok(result);
+                case null:
+                    {
+                        PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
+                        PagingDto paging = pagedProducts.ExtractPaging();
+
+                        Paginate<ProductViewDto> result = new Paginate<ProductViewDto>
+                        {
+                            items = _mapper.Map<IEnumerable<ProductViewDto>>(pagedProducts),
+                            pagingInfo = paging
+                        };
+                        return Ok(result);
+                    }
+                default:
+                    {
+                        PagedList<Product> pagedProducts = await _productService.GetPagedProductListFromRegion(parameters);
+                        PagingDto paging = pagedProducts.ExtractPaging();
+
+                        Paginate<ProductViewDto> result = new Paginate<ProductViewDto>
+                        {
+                            items = _mapper.Map<IEnumerable<ProductViewDto>>(pagedProducts),
+                            pagingInfo = paging
+                        };
+                        return Ok(result);
+                    }
+            }
         }
 
         /// <summary>
@@ -91,7 +109,7 @@ namespace OnlineMarket.API.Controllers
 
             IEnumerable<Product> products = await _productService.GetUnapprovedProductList(parameters);
             IEnumerable<ProductViewDto> productsView = _mapper.Map<IEnumerable<ProductViewDto>>(products);
-            
+
             PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
             PagingDto paging = pagedProducts.ExtractPaging();
 
@@ -121,7 +139,7 @@ namespace OnlineMarket.API.Controllers
 
             IEnumerable<Product> products = await _productService.GetRejectedProductList(parameters);
             IEnumerable<ProductViewDto> productsView = _mapper.Map<IEnumerable<ProductViewDto>>(products);
-            
+
             PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
             PagingDto paging = pagedProducts.ExtractPaging();
 
@@ -161,15 +179,6 @@ namespace OnlineMarket.API.Controllers
         /// <summary>
         /// Create new product
         /// </summary>
-        /// <response code="200">
-        /// Successfully created a product
-        /// </response>
-        /// <response code="400">
-        /// Something went wrong
-        /// </response>
-        /// <response code="403">
-        /// Unauthorized
-        /// </response>
         [HttpPost(ApiConstants.ProductRoutes.CreateProduct)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
@@ -180,7 +189,7 @@ namespace OnlineMarket.API.Controllers
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return Forbid();
+                return Forbid("Unauthorized");
             }
 
             Product product = _mapper.Map<Product>(createProductDto);
@@ -207,22 +216,10 @@ namespace OnlineMarket.API.Controllers
         /// <summary>
         /// Puchase product
         /// </summary>
-        /// <response code="200">
-        /// Successfully purchased product
-        /// </response>
-        /// <response code="400">
-        /// Not enough stock to complete purchase
-        /// </response>
-        /// <response code="403">
-        /// Unauthorized
-        /// </response>
-        /// <response code="404">
-        /// Product not found
-        /// </response>
         [HttpPost(ApiConstants.ProductRoutes.GetProductById)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(APIError<ErrorTypes>),StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PurchaseProduct([FromParameter("id")] int id, [FromQuery] int quantity)
         {
@@ -251,7 +248,7 @@ namespace OnlineMarket.API.Controllers
 
             if (await _productService.BuyProduct(id, quantity))
             {
-                return Ok();
+                return Ok("Successfully purchased product");
             }
 
             return BadRequest("Something went wrong!");
@@ -265,7 +262,7 @@ namespace OnlineMarket.API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateProduct([FromParameter("id")] int id, ProductUpdateDto updatedProductDto)
+        public async Task<IActionResult> UpdateProduct([FromParameter("id")] int id, [FromForm] ProductUpdateDto updatedProductDto)
         {
             ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
             string userId = HttpContext.GetUserIdFromToken();
@@ -285,6 +282,42 @@ namespace OnlineMarket.API.Controllers
             Product product = await _productService.UpdateProduct(id, updatedProductDto);
             ProductViewDto productView = _mapper.Map<ProductViewDto>(product);
             return Ok(productView);
+        }
+
+
+        /// <summary>
+        /// Delete product
+        /// </summary>
+        [HttpDelete(ApiConstants.ProductRoutes.DeleteProduct)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProductViewDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteProduct([FromParameter("id")] int id)
+        {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Forbid();
+            }
+
+            if (!await _productService.ProductExists(id))
+            {
+                return NotFound(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Product does not exist")
+                    .Build());
+            }
+
+            bool result = await _productService.DeleteProduct(id);
+            if (!result)
+            {
+                return BadRequest(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Unable to delete product, try again later")
+                    .Build());
+            }
+            return Ok();
         }
 
 
@@ -314,6 +347,79 @@ namespace OnlineMarket.API.Controllers
 
             var product = await _productService.ApproveProduct(id, approval);
             return Ok(product);
+        }
+
+
+        /// <summary>
+        /// Change image to main
+        /// </summary>
+        [HttpPut(ApiConstants.ProductRoutes.MakeMain)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> MakeMain([FromParameter("id")] int id, [FromParameter("imageId")] int imageId)
+        {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Forbid();
+            }
+
+            if (!await _productService.ProductExists(id))
+            {
+                return NotFound(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Product does not exist")
+                    .Build());
+            }
+
+            bool result = await _productService.MakeMain(id, imageId);
+            if (result)
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+
+        /// <summary>
+        /// Delete image
+        /// </summary>
+        [HttpDelete(ApiConstants.ProductRoutes.DeleteImage)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteImage([FromParameter("id")] int id, [FromParameter("imageId")] int imageId)
+        {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Forbid();
+            }
+
+            if (!await _productService.ProductExists(id))
+            {
+                return NotFound(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Product does not exist")
+                    .Build());
+            }
+
+            if (!await _productService.ImageExists(imageId))
+            {
+                return NotFound(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("Image does not exist")
+                    .Build());
+            }
+            bool result = await _productService.DeleteImage(id, imageId);
+            if (result)
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
     }
 }

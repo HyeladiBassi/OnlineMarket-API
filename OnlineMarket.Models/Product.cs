@@ -11,11 +11,10 @@ namespace OnlineMarket.Models
         public double Price { get; set; }
         public int Stock { get; set; }
         public string Description { get; set; }
-        // public string WarehouseLocation { get; set; }
+        public string WarehouseLocation { get; set; }
         public string  Status { get; set; }
         public string Category { get; set; }
         public ICollection<Image> Images { get; set; }
-        public string PaymentMethod { get; set; }
         public SystemUser Seller { get; set; }
         public ICollection<ProductReview> Reviews { get; set; }
         public double AverageRating { get; set; }

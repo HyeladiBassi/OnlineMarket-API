@@ -6,6 +6,7 @@ using OnlineMarket.DataAccess;
 using OnlineMarket.DataTransferObjects.Product;
 using OnlineMarket.DataTransferObjects.ProductReview;
 using OnlineMarket.Helpers;
+using OnlineMarket.Helpers.FileHelper;
 using OnlineMarket.Models;
 using OnlineMarket.Services.Extensions;
 using OnlineMarket.Services.Interfaces;
@@ -15,10 +16,12 @@ namespace OnlineMarket.Services.Main
     public class ProductService : IProductService
     {
         private readonly DataContext _context;
+        private readonly IFileHelper _fileHelper;
 
-        public ProductService(DataContext context)
+        public ProductService(DataContext context, IFileHelper fileHelper)
         {
             _context = context;
+            _fileHelper = fileHelper;
         }
 
         public async Task<bool> CreateProduct(Product createdProduct)
@@ -52,7 +55,22 @@ namespace OnlineMarket.Services.Main
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
                 .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
                 .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
+            return products;
+        }
 
+        public async Task<PagedList<Product>> GetPagedProductListFromRegion(ProductResourceParameters resourceParameters)
+        {
+            PagedList<Product> products = await _context.Products
+                .Include(x => x.Seller)
+                .Include(x => x.Images)
+                .Where(x => x.Status == "approved")
+                .Where(x => !x.IsDeleted)
+                .Where(x => x.WarehouseLocation == resourceParameters.region)
+                .WhereGtEq(x => x.Price, resourceParameters.priceGt)
+                .WhereLtEq(x => x.Price, resourceParameters.priceLt)
+                .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
+                .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
+                .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
             return products;
         }
 
@@ -97,6 +115,7 @@ namespace OnlineMarket.Services.Main
             List<Product> productList = await _context.Products
                 .AsQueryable()
                 .Include(x => x.Seller)
+                .Include(x => x.Images)
                 .Where(x => x.Status == "pending")
                 .ToListAsync();
 
@@ -107,6 +126,7 @@ namespace OnlineMarket.Services.Main
         {
             PagedList<Product> productList = await _context.Products
                 .AsQueryable()
+                .Include(x => x.Images)
                 .Where(x => x.Seller.Id == userId)
                 .Where(x => !x.IsDeleted)
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
@@ -147,19 +167,26 @@ namespace OnlineMarket.Services.Main
                 product.Name = updatedProduct.Name;
             }
 
-            if (updatedProduct.PaymentMethod != null)
+            if (updatedProduct.Price != null)
             {
-                product.PaymentMethod = updatedProduct.PaymentMethod;
+                product.Price = (double)updatedProduct.Price;
             }
 
-            if (updatedProduct.Price != product.Price)
+            if (updatedProduct.Stock != null)
             {
-                product.Price = updatedProduct.Price;
+                product.Stock = (int)updatedProduct.Stock;
             }
 
-            if (updatedProduct.Stock != product.Stock)
+            if (updatedProduct.WarehouseLocation != null)
             {
-                product.Stock = updatedProduct.Stock;
+                product.WarehouseLocation = updatedProduct.WarehouseLocation;
+            }
+
+            if (updatedProduct.imageFiles != null && updatedProduct.imageFiles.Count() > 0)
+            {
+                SaveFileResult[] mediaFiles = await Task.WhenAll(updatedProduct.imageFiles.Select(x => _fileHelper.SaveFile(x)));
+                List<Image> images = mediaFiles.Select(x => new Image() { Link = $"/{x.fileName.Replace('\\', '/')}", Type = x.type, MimeType = x.mimeType }).ToList();
+                product.Images = images;
             }
 
             _context.Products.Update(product);
@@ -169,11 +196,6 @@ namespace OnlineMarket.Services.Main
                 return product;
             }
             return null;
-        }
-
-        private async Task<bool> Save()
-        {
-            return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> BuyProduct(int productId, int quantity)
@@ -204,11 +226,46 @@ namespace OnlineMarket.Services.Main
         public async Task<bool> ProductExists(int productId)
         {
             Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
-            if (product != null)
+            if (product != null && product.IsDeleted == false)
             {
                 return true;
             }
             return false;
+        }
+
+        public async Task<bool> ImageExists(int imageId)
+        {
+            Image image = await _context.Images.FirstOrDefaultAsync(x => x.Id == imageId);
+            if (image != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> DeleteImage(int productId, int imageId)
+        {
+            Product product = await _context.Products.Include(x => x.Images).FirstOrDefaultAsync(x => x.Id == productId);
+            Image imageToDelete = product.Images.FirstOrDefault(x => x.Id == imageId);
+            _context.Images.Remove(imageToDelete);
+            return await Save();
+        }
+
+        public async Task<bool> MakeMain(int productId, int imageId)
+        {
+            Product product = await _context.Products.Include(x => x.Images).FirstOrDefaultAsync(x => x.Id == productId);
+            foreach (Image image in product.Images)
+            {
+                if (image.Id == imageId)
+                {
+                    image.IsMain = true;
+                } else
+                {
+                    image.IsMain = false;
+                }
+            }
+            _context.Products.Update(product);
+            return await Save();
         }
 
         public async Task<bool> ApproveProduct(int productId, bool approval)
@@ -222,6 +279,47 @@ namespace OnlineMarket.Services.Main
             }
             _context.Products.Update(product);
             return await Save();
+        }
+
+        public async Task<Category> UpdateCategory(int categoryId, CategoryUpdateDto updateDto)
+        {
+            Category existingCategory = await _context.Categories.FirstOrDefaultAsync(x => x.Id == categoryId);
+            if (updateDto.Name != null)
+            {
+                existingCategory.Name = updateDto.Name;
+            }
+
+            _context.Categories.Update(existingCategory);
+
+            if (await Save())
+            {
+                return existingCategory;
+            }
+            return null;
+        }
+
+        public async Task<bool> AddCategory(Category createdCategory)
+        {
+            await _context.AddAsync(createdCategory);
+            return await Save();
+        }
+
+        public async Task<bool> DeleteCategory(int categoryId)
+        {
+            Category category = await _context.Categories.SingleOrDefaultAsync(x => x.Id == categoryId);
+            _context.Categories.Remove(category);
+            return await Save();
+
+        }
+
+        public async Task<ICollection<Category>> GetCategories()
+        {
+            ICollection<Category> list = await _context.Categories.AsQueryable().ToListAsync();
+            return list;
+        }
+        private async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

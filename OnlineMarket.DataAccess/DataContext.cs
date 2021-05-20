@@ -11,8 +11,10 @@ namespace OnlineMarket.DataAccess
             
         }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Category> Categories { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<ProductReview> Reviews { get; set; }
+        public DbSet<Image> Images { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     }

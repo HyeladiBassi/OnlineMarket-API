@@ -6,6 +6,5 @@ namespace OnlineMarket.Services.Interfaces
     public interface IAdminService
     {
          Task<SystemUser> AddModerator(SystemUser moderator);
-         
     }
 }

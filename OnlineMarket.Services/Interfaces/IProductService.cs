@@ -9,6 +9,7 @@ namespace OnlineMarket.Services.Interfaces
     public interface IProductService
     {
         Task<PagedList<Product>> GetPagedProductList(ProductResourceParameters resourceParameters);
+        Task<PagedList<Product>> GetPagedProductListFromRegion(ProductResourceParameters resourceParameters);
         Task<IEnumerable<Product>> GetProductList(ProductResourceParameters resourceParameters);
         Task<IEnumerable<Product>> GetRejectedProductList(ProductResourceParameters resourceParameters);
         Task<IEnumerable<Product>> GetUnapprovedProductList(ProductResourceParameters resourceParameters);
@@ -22,5 +23,12 @@ namespace OnlineMarket.Services.Interfaces
         Task<bool> BuyProduct(int productId, int quantity);
         Task<bool> CheckAvailability(int productId, int quantity);
         Task<bool> ProductExists(int productId);
+        Task<bool> DeleteImage(int productId, int imageId);
+        Task<bool> ImageExists(int imageId);
+        Task<bool> MakeMain(int productId, int imageId);
+        Task<Category> UpdateCategory(int categoryId, CategoryUpdateDto updateDto);
+        Task<bool> AddCategory(Category createdCategory);
+        Task<bool> DeleteCategory(int categoryId);
+
     }
 }

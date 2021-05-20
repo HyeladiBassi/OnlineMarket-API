@@ -4,6 +4,7 @@ namespace OnlineMarket.DataTransferObjects.Product
 {
     public class ProductResourceParameters : ResourceParameters
     {
+        public string region { get; set; }
         public string category { get; set; }
         public string status { get; set; }
         public int? stockGt { get; set; }
