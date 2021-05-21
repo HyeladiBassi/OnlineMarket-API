@@ -241,7 +241,7 @@ namespace OnlineMarket.API.Controllers
             if (!await _productService.CheckAvailability(id, quantity))
             {
                 return BadRequest(errorBuilder
-                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .ChangeType(ErrorTypes.InvalidRequestBody)
                     .SetMessage("Not enough stock to complete purchase")
                     .Build());
             }
@@ -344,8 +344,7 @@ namespace OnlineMarket.API.Controllers
                     .SetMessage("Product does not exist")
                     .Build());
             }
-
-            var product = await _productService.ApproveProduct(id, approval);
+            bool product = await _productService.ApproveProduct(id, approval, userId);
             return Ok(product);
         }
 

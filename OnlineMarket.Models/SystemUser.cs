@@ -13,8 +13,9 @@ namespace OnlineMarket.Models
         public string Area { get; set; }
         public string Address { get; set; }
         public string ExtraDetails { get; set; }
-        public Image ProfilePicture { get; set; }
-        public ICollection<Product> WishList { get; set; }
+        public ICollection<WishListItem> WishList { get; set; }
         public bool IsDeleted { get; set; }
+        public string IBAN { get; set; }
+        public string BankName { get; set; }
     }
 }

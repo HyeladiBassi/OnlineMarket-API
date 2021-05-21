@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineMarket.Models
 {
@@ -16,6 +17,7 @@ namespace OnlineMarket.Models
         public string Category { get; set; }
         public ICollection<Image> Images { get; set; }
         public SystemUser Seller { get; set; }
+        public SystemUser ModeratedBy { get; set; }
         public ICollection<ProductReview> Reviews { get; set; }
         public double AverageRating { get; set; }
         public bool IsDeleted { get; set; }

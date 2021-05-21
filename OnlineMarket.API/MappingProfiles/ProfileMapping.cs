@@ -56,6 +56,17 @@ namespace OnlineMarket.API.MappingProfiles
             #region Transaction
             CreateMap<TransactionCreateDto, Transaction>();
             #endregion
+
+            #region Wishlist
+            CreateMap<WishListItem, WishListViewDto>();
+            CreateMap<Product, WishListItemViewDto>()
+                .ForMember(x => x.Id, map => map.MapFrom(x => x.Id))
+                .ForMember(x => x.Name, map => map.MapFrom(x => x.Name))
+                .ForMember(x => x.Price, map => map.MapFrom(x => x.Price))
+                .ForMember(x => x.WarehouseLocation, map => map.MapFrom(x => x.WarehouseLocation))
+                .ForMember(x => x.AverageRating, map => map.MapFrom(x => x.AverageRating));
+
+            #endregion
             
         }
     }

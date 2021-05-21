@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineMarket.DataAccess;
 using OnlineMarket.DataTransferObjects.Product;
@@ -17,11 +18,13 @@ namespace OnlineMarket.Services.Main
     {
         private readonly DataContext _context;
         private readonly IFileHelper _fileHelper;
+        private readonly UserManager<SystemUser> _userManager;
 
-        public ProductService(DataContext context, IFileHelper fileHelper)
+        public ProductService(DataContext context, IFileHelper fileHelper, UserManager<SystemUser> userManager)
         {
             _context = context;
             _fileHelper = fileHelper;
+            _userManager = userManager;
         }
 
         public async Task<bool> CreateProduct(Product createdProduct)
@@ -268,7 +271,7 @@ namespace OnlineMarket.Services.Main
             return await Save();
         }
 
-        public async Task<bool> ApproveProduct(int productId, bool approval)
+        public async Task<bool> ApproveProduct(int productId, bool approval, string userId)
         {
             Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
             if (approval)
@@ -277,6 +280,8 @@ namespace OnlineMarket.Services.Main
             } else {
                 product.Status  = "rejected";
             }
+            SystemUser moderator  = await _userManager.FindByIdAsync(userId);
+            product.ModeratedBy = moderator;
             _context.Products.Update(product);
             return await Save();
         }

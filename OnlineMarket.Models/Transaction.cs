@@ -7,13 +7,12 @@ namespace OnlineMarket.Models
     {
         public int Id { get; set; }
         public string Currency { get; set; }
-        public double Price { get; set; }
-        public string Description { get; set; }
         public string Status { get; set; }
-        public ICollection<Product> Products { get; set; }
+        public ICollection<Order> Orders { get; set; }
+        public int TotalQuantity { get; set; }
+        public double TotalPrice { get; set; }
         public SystemUser Buyer { get; set; }
         public Delivery Delivery { get; set; }
-        public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public Transaction()

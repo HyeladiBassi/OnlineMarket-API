@@ -8,8 +8,10 @@ namespace OnlineMarket.Services.Interfaces
     public interface IUserService
     {
          Task<SystemUser> GetUserById(string userId);
-         Task<SystemUser> UpdateUser(SystemUserUpdateDto updateDto);
+         Task<SystemUser> UpdateUser(string userId, SystemUserUpdateDto updateDto);
          Task<bool> DeleteUser(string userId);
-         Task<bool> UpdateWishList(IEnumerable<Product> products);
+         Task<ICollection<WishListItem>> GetWishlist(string userId);
+         Task<bool> AddToWishList(string userId, int productId);
+         Task<bool> RemoveFromWishList(string userId, int productId);
     }
 }

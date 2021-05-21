@@ -16,7 +16,7 @@ namespace OnlineMarket.Services.Interfaces
         Task<PagedList<Product>> GetPagedProductListByUserId(string userId, ProductResourceParameters resourceParameters);
         Task<IEnumerable<Product>> GetProductListByUserId(string userId);
         Task<Product> GetProductById(int productId);
-        Task<bool> ApproveProduct(int productId, bool approval);
+        Task<bool> ApproveProduct(int productId, bool approval, string userId);
         Task<bool> CreateProduct(Product createdProduct);
         Task<Product> UpdateProduct(int productId, ProductUpdateDto updatedProduct);
         Task<bool> DeleteProduct(int productId);
