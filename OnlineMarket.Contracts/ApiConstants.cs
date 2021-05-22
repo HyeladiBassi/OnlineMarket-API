@@ -51,7 +51,7 @@ namespace OnlineMarket.Contracts
         {
             public const string Base = BaseUrl + Version + "{id}/reviews" ;
             public const string GetReviewsByProductId = Base ;
-            public const string GetReviewsByUserId = BaseUrl + Version + "{userId}/reviews" ;
+            public const string GetReviewsByUserId = BaseUrl + Version + "user/{userId}/reviews" ;
             public const string CreateProductReview = Base ;
             public const string UpdateProductReview = BaseUrl + Version + "reviews/{id}" ;
             public const string DeleteProductReview = BaseUrl + Version + "reviews/{id}" ;
