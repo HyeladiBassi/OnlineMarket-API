@@ -48,7 +48,7 @@ namespace OnlineMarket.Services.Main
 
         public async Task<ICollection<WishListItem>> GetWishlist(string userId)
         {
-            var wishlist = await _context.WishList.Include(x => x.Product).Where(x => x.UserId == userId).ToListAsync();
+            var wishlist = await _context.WishList.Include(x => x.Product).Include(x => x.Product.Images).Where(x => x.UserId == userId).ToListAsync();
             return wishlist;
         }
 
