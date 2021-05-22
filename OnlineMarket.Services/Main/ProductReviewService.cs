@@ -38,7 +38,7 @@ namespace OnlineMarket.Services.Main
 
         public async Task<ProductReview> GetProductReviewById(int reviewId)
         {
-            ProductReview review = await _context.Reviews.Include(x => x.Reviewer).FirstOrDefaultAsync(x => x.Id == reviewId);
+            ProductReview review = await _context.Reviews.Include(x => x.Reviewer).Include(x => x.Images).FirstOrDefaultAsync(x => x.Id == reviewId);
             return review;
         }
 
