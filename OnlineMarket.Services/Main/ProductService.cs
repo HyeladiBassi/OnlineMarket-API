@@ -80,7 +80,6 @@ namespace OnlineMarket.Services.Main
         public async Task<Product> GetProductById(int productId)
         {
             Product product = await _context.Products
-                .AsNoTracking()
                 .Include(x => x.Seller)
                 .Include(x => x.Reviews)
                 .Include(x => x.Images)

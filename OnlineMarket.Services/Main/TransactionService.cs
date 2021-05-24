@@ -78,6 +78,7 @@ namespace OnlineMarket.Services.Main
         public async Task<PagedList<Transaction>> GetPagedTransactionList(TransactionResourceParameters parameters)
         {
             PagedList<Transaction> transactions = await _context.Transactions
+                .Include(x => x.Orders)
                 .WhereLtEq(x => x.TotalPrice, parameters.AmountLt)
                 .WhereGtEq(x => x.TotalPrice, parameters.AmountGt)
                 .ToPagedListAsync(parameters.pageNumber, parameters.pageSize);
@@ -98,6 +99,7 @@ namespace OnlineMarket.Services.Main
         public async Task<PagedList<Transaction>> GetTransactionListByUserId(string userId, TransactionResourceParameters parameters)
         {
             PagedList<Transaction> transactions = await _context.Transactions
+                .Include(x => x.Orders)
                 .Where(x => x.Buyer.Id == userId)
                 .WhereLtEq(x => x.TotalPrice, parameters.AmountLt)
                 .WhereGtEq(x => x.TotalPrice, parameters.AmountGt)

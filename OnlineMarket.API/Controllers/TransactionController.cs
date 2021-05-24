@@ -37,20 +37,20 @@ namespace OnlineMarket.API.Controllers
         public async Task<IActionResult> GetAllTransactions([FromQuery] TransactionResourceParameters parameters)
         {
             string userId = HttpContext.GetUserIdFromToken();
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return Forbid();
-            }
+            // if (string.IsNullOrWhiteSpace(userId))
+            // {
+            //     return Forbid();
+            // }
 
             PagedList<Transaction> pagedTransactions = await _transactionService.GetPagedTransactionList(parameters);
             PagingDto paging = pagedTransactions.ExtractPaging();
 
-            Paginate<TransactionViewDto> result = new Paginate<TransactionViewDto>
-            {
-                items = _mapper.Map<IEnumerable<TransactionViewDto>>(pagedTransactions),
-                pagingInfo = paging
-            };
-            return Ok(result);
+            // Paginate<TransactionViewDto> result = new Paginate<TransactionViewDto>
+            // {
+            //     items = _mapper.Map<IEnumerable<TransactionViewDto>>(pagedTransactions),
+            //     pagingInfo = paging
+            // };
+            return Ok(pagedTransactions);
         }
 
         [HttpGet(ApiConstants.TransactionRoutes.GetTransactionById)]
@@ -70,10 +70,10 @@ namespace OnlineMarket.API.Controllers
         public async Task<IActionResult> CreateTransaction(TransactionCreateDto createDto)
         {
             string userId = HttpContext.GetUserIdFromToken();
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return Forbid();
-            }
+            // if (string.IsNullOrWhiteSpace(userId))
+            // {
+            //     return Forbid();
+            // }
             SystemUser buyer = await _userService.GetUserById(userId);
             Delivery mappedDelivery = _mapper.Map<Delivery>(createDto.Delivery);
 
