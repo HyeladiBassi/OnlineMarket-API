@@ -4,9 +4,14 @@ using AutoMapper;
 using Hangfire;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OnlineMarket.API.Extensions;
 using OnlineMarket.Contracts;
+using OnlineMarket.DataTransferObjects;
+using OnlineMarket.DataTransferObjects.Product;
 using OnlineMarket.DataTransferObjects.SystemUser;
+using OnlineMarket.DataTransferObjects.Transaction;
 using OnlineMarket.Errors;
+using OnlineMarket.Helpers;
 using OnlineMarket.Models;
 using OnlineMarket.Services.Extensions;
 using OnlineMarket.Services.Interfaces;
@@ -18,12 +23,14 @@ namespace OnlineMarket.API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ITransactionService _transactionService;
         private readonly IProductService _productService;
 
-        public UserController(IUserService userService, IMapper mapper, IProductService productService)
+        public UserController(IUserService userService, IMapper mapper, IProductService productService, ITransactionService transactionService)
         {
             _userService = userService;
             _mapper = mapper;
+            _transactionService = transactionService;
             _productService = productService;
         }
 
@@ -80,6 +87,26 @@ namespace OnlineMarket.API.Controllers
             bool user = await _userService.DeleteUser(userId);
             return Ok(user);
 
+        }
+
+        [HttpGet(ApiConstants.UserRoutes.GetTransactionHistory)]
+        public async Task<IActionResult> GetTransactionHistory([FromParameter("userId")] string userId, [FromQuery] TransactionResourceParameters parameters)
+        {
+            string id = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return Forbid();
+            }
+
+            PagedList<Transaction> pagedTransactions = await _transactionService.GetTransactionListByUserId(userId, parameters);
+            PagingDto paging = pagedTransactions.ExtractPaging();
+
+            Paginate<TransactionViewDto> result = new Paginate<TransactionViewDto>
+            {
+                items = _mapper.Map<IEnumerable<TransactionViewDto>>(pagedTransactions),
+                pagingInfo = paging
+            };
+            return Ok(result);
         }
 
         /// <summary>

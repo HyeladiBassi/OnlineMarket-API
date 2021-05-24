@@ -10,11 +10,10 @@ namespace OnlineMarket.DataTransferObjects.Transaction
     {
         public int Id { get; set; }
         public string Currency { get; set; }
-        public double Price { get; set; }
-        public string Description { get; set; }
-        public string PaymentMethod { get; set; }
+        public int TotalQuantity { get; set; }
+        public double TotalPrice { get; set; }
         public string Status { get; set; }
-        public ICollection<ProductViewDto> Products { get; set; }
+        public ICollection<OrderViewDto> Orders { get; set; }
         public SystemUserViewDto Buyer { get; set; }
         public DeliveryViewDto Delivery { get; set; }
         public DateTime CreatedAt { get; set; }

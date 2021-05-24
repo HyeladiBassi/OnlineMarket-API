@@ -6,10 +6,9 @@ namespace OnlineMarket.DataTransferObjects.Transaction
 {
     public class TransactionUpdateDto
     {
-        public string Description { get; set; }
-        public string PaymentMethod { get; set; }
+        public string Currency { get; set; }
         public string Status { get; set; }
-        public ICollection<ProductUpdateDto> Products { get; set; }
+        public IEnumerable<OrderCreateDto> Orders { get; set; }
         public DeliveryUpdateDto Delivery { get; set; }
     }
 }

@@ -31,6 +31,7 @@ namespace OnlineMarket.API.Installers
             services.AddScoped<IFileHelper, FileHelper>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IProductReviewService, ProductReviewService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddTransient<SystemRole>();

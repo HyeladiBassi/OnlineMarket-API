@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineMarket.DataAccess;
 using OnlineMarket.DataTransferObjects.Product;
 using OnlineMarket.DataTransferObjects.Transaction;
+using OnlineMarket.Errors;
 using OnlineMarket.Helpers;
 using OnlineMarket.Models;
+using OnlineMarket.Services.Extensions;
 using OnlineMarket.Services.Interfaces;
 
 namespace OnlineMarket.Services.Main
@@ -21,43 +26,89 @@ namespace OnlineMarket.Services.Main
             _context = context;
             _userManager = userManager;
         }
-        // public async Task<Transaction> CreateTransaction(TransactionCreateDto transactionDto,ICollection<Product> products, string userId)
+
+        // public async Task<bool> CheckProducts(ICollection<OrderCreateDto> orders)
         // {
-            // SystemUser user = await _userManager.FindByIdAsync(userId);
-            // Transaction transaction = new Transaction
-            // {
-            //     Buyer = user,
-            //     Products = products,
-            //     Status = "Pending",
-            //     Delivery = transactionDto.Delivery,
-                
-            // };
-        //     return new Transaction();
+        //     ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
+        //     foreach (var item in orders)
+        //     {
+        //         var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == item.ProductId);
+        //         if (product != null)
+        //         {
+        //             var error = errorBuilder.AddField(, "Product with id("") does not exist");
+        //         }
+        //     }
         // }
 
-        public Task<Transaction> DeleteTransaction(int id)
+        public async Task<bool> CreateTransaction(string userId, Transaction transaction)
         {
-            throw new NotImplementedException();
+            foreach (var item in transaction.Orders)
+            {
+                await DecreaseStock(item.Product.Id, item.Quantity);
+            }
+            List<EntityEntry> changedEntriesCopy = _context.ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added ||
+                    e.State == EntityState.Modified ||
+                    e.State == EntityState.Deleted)
+                .ToList();
+
+            foreach (var entry in changedEntriesCopy)
+            {
+                entry.State = EntityState.Detached;
+            }
+            await _context.Transactions.AddAsync(transaction);
+            return await Save();
         }
 
-        public Task<PagedList<Transaction>> GetPagedTransactionList(TransactionResourceParameters parameters)
+        public async Task<bool> DecreaseStock(int productId, int quantity)
         {
-            throw new NotImplementedException();
+            Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
+            product.Stock = product.Stock - quantity;
+            _context.Products.Update(product);
+            return await Save();
         }
 
-        public Task<Transaction> GetTransactionById(int id)
+        public async Task<bool> DeleteTransaction(int id)
         {
-            throw new NotImplementedException();
+            Transaction item = await _context.Transactions.FirstOrDefaultAsync(x => x.Id == id);
+            _context.Transactions.Remove(item);
+            return await Save();
         }
 
-        public Task<ICollection<Transaction>> GetTransactionListByUserId(string userId)
+        public async Task<PagedList<Transaction>> GetPagedTransactionList(TransactionResourceParameters parameters)
         {
-            throw new NotImplementedException();
+            PagedList<Transaction> transactions = await _context.Transactions
+                .WhereLtEq(x => x.TotalPrice, parameters.AmountLt)
+                .WhereGtEq(x => x.TotalPrice, parameters.AmountGt)
+                .ToPagedListAsync(parameters.pageNumber, parameters.pageSize);
+
+            return transactions;
         }
 
-        public Task<Transaction> UpdateTransaction(int id, TransactionUpdateDto transaction)
+        public async Task<Transaction> GetTransactionById(int id)
         {
-            throw new NotImplementedException();
+            Transaction transaction = await _context.Transactions
+                .Include(x => x.Buyer)
+                .Include(x => x.Orders)
+                .Include(x => x.Delivery)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            return transaction;
+        }
+
+        public async Task<PagedList<Transaction>> GetTransactionListByUserId(string userId, TransactionResourceParameters parameters)
+        {
+            PagedList<Transaction> transactions = await _context.Transactions
+                .Where(x => x.Buyer.Id == userId)
+                .WhereLtEq(x => x.TotalPrice, parameters.AmountLt)
+                .WhereGtEq(x => x.TotalPrice, parameters.AmountGt)
+                .ToPagedListAsync(parameters.pageNumber, parameters.pageSize);
+
+            return transactions;
+        }
+
+        private async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }
