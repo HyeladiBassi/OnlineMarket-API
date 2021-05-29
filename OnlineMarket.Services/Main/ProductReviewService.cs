@@ -44,7 +44,7 @@ namespace OnlineMarket.Services.Main
 
         public async Task<IEnumerable<ProductReview>> GetProductReviewsByProductId(int productId)
         {
-            IEnumerable<ProductReview> reviews = await _context.Reviews.Include(x => x.Reviewer).Where(x => x.ProductId == productId).ToListAsync();
+            IEnumerable<ProductReview> reviews = await _context.Reviews.Include(x => x.Reviewer).Include(x => x.Images).Where(x => x.ProductId == productId).ToListAsync();
             return reviews;
         }
 
