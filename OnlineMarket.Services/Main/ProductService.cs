@@ -106,6 +106,7 @@ namespace OnlineMarket.Services.Main
             List<Product> productList = await _context.Products
                 .AsQueryable()
                 .Include(x => x.Seller)
+                .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "rejected")
                 .ToListAsync();
 
@@ -118,6 +119,7 @@ namespace OnlineMarket.Services.Main
                 .AsQueryable()
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
+                .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "pending")
                 .ToListAsync();
 
