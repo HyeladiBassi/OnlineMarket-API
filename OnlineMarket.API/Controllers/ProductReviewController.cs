@@ -107,13 +107,12 @@ namespace OnlineMarket.API.Controllers
             ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
 
             string userId = HttpContext.GetUserIdFromToken();
-            string userRole = HttpContext.GetUserRoleFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
                 return StatusCode(403);
             }
             ProductReview review = await _reviewService.GetProductReviewById(id);
-            if (review.Reviewer.Id != userId && userRole != "moderator")
+            if (review.Reviewer.Id != userId)
             {
                 return BadRequest(errorBuilder
                     .ChangeType(ErrorTypes.InvalidObjectId)

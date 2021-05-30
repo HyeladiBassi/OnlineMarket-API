@@ -38,25 +38,25 @@ namespace OnlineMarket.Services.Main
 
         public async Task<ProductReview> GetProductReviewById(int reviewId)
         {
-            ProductReview review = await _context.Reviews.Include(x => x.Reviewer).Include(x => x.Images).FirstOrDefaultAsync(x => x.Id == reviewId);
+            ProductReview review = await _context.Reviews.Include(x => x.Reviewer).Include(x => x.Images).Where(x => !x.IsDeleted).FirstOrDefaultAsync(x => x.Id == reviewId);
             return review;
         }
 
         public async Task<IEnumerable<ProductReview>> GetProductReviewsByProductId(int productId)
         {
-            IEnumerable<ProductReview> reviews = await _context.Reviews.Include(x => x.Reviewer).Include(x => x.Images).Where(x => x.ProductId == productId).ToListAsync();
+            IEnumerable<ProductReview> reviews = await _context.Reviews.Include(x => x.Reviewer).Include(x => x.Images).Where(x => x.ProductId == productId).Where(x => !x.IsDeleted).ToListAsync();
             return reviews;
         }
 
         public async Task<IEnumerable<ProductReview>> GetProductReviews()
         {
-            IEnumerable<ProductReview> reviews = await _context.Reviews.Include(x => x.Reviewer).ToListAsync();
+            IEnumerable<ProductReview> reviews = await _context.Reviews.Where(x => !x.IsDeleted).Include(x => x.Reviewer).ToListAsync();
             return reviews;
         }
 
         public async Task<IEnumerable<ProductReview>> GetProductReviewsByUserId(string userId)
         {
-            IEnumerable<ProductReview> reviews = await _context.Reviews.Where(x => x.Reviewer.Id == userId).ToListAsync();
+            IEnumerable<ProductReview> reviews = await _context.Reviews.Where(x => !x.IsDeleted).Where(x => x.Reviewer.Id == userId).ToListAsync();
             return reviews;
         }
 
