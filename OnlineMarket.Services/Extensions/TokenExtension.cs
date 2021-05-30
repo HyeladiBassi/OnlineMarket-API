@@ -29,7 +29,7 @@ namespace OnlineMarket.Services.Extensions
             return userIdClaim.Value;
         }
 
-        public static string GetUserRole(this HttpContext httpContext)
+        public static string GetUserRoleFromToken(this HttpContext httpContext)
         {
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
             KeyValuePair<string, Microsoft.Extensions.Primitives.StringValues> authHeader = httpContext.Request.Headers.Where(x => x.Key == "Authorization").FirstOrDefault();

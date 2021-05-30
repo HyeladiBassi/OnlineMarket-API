@@ -5,8 +5,6 @@ using OnlineMarket.DataTransferObjects.SystemUser;
 
 namespace OnlineMarket.DataTransferObjects.Product
 {
-    // ! Add collection for images
-
     public class ProductViewDto
     {
         public int Id { get; set; }
