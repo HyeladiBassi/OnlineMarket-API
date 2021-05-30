@@ -37,7 +37,8 @@ namespace OnlineMarket.API.MappingProfiles
             #region Product Review
             CreateMap<ProductReviewCreateDto, ProductReview>();
             CreateMap<ProductReview, ProductReviewViewDto>()
-                .ForMember(x => x.ReviewerName, map => map.MapFrom(x => x.Reviewer.FirstName));
+                .ForMember(x => x.ReviewerName, map => map.MapFrom(x => x.Reviewer.FirstName))
+                .ForMember(x => x.DateCreated, map => map.MapFrom(x => x.DateCreated));
             #endregion
 
             #region Images
