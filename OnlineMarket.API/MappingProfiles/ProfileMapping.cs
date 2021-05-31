@@ -52,10 +52,12 @@ namespace OnlineMarket.API.MappingProfiles
 
             #region Delivery
             CreateMap<DeliveryCreateDto, Delivery>();
+            CreateMap<Delivery, DeliveryViewDto>();
             #endregion
 
             #region Transaction
             CreateMap<TransactionCreateDto, Transaction>();
+            CreateMap<Transaction, TransactionViewDto>();
             #endregion
 
             #region Wishlist
@@ -66,7 +68,10 @@ namespace OnlineMarket.API.MappingProfiles
                 .ForMember(x => x.Price, map => map.MapFrom(x => x.Price))
                 .ForMember(x => x.WarehouseLocation, map => map.MapFrom(x => x.WarehouseLocation))
                 .ForMember(x => x.AverageRating, map => map.MapFrom(x => x.AverageRating));
+            #endregion
 
+            #region Order
+            CreateMap<Order, OrderViewDto>();
             #endregion
             
         }

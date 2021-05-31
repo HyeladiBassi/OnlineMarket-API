@@ -88,11 +88,18 @@ namespace OnlineMarket.Services.Main
 
         public async Task<Transaction> GetTransactionById(int id)
         {
+            List<Order> li = new List<Order>();
             Transaction transaction = await _context.Transactions
                 .Include(x => x.Buyer)
                 .Include(x => x.Orders)
                 .Include(x => x.Delivery)
+                .Include(x => x.Orders)
                 .FirstOrDefaultAsync(x => x.Id == id);
+
+            foreach (var order in transaction.Orders)
+            {
+                li.Add(await GetOrder(order.Id));
+            }
             return transaction;
         }
 
@@ -106,6 +113,12 @@ namespace OnlineMarket.Services.Main
                 .ToPagedListAsync(parameters.pageNumber, parameters.pageSize);
 
             return transactions;
+        }
+
+        private async Task<Order> GetOrder(int orderId)
+        {
+            Order order = await _context.Orders.Include(x => x.Product).FirstOrDefaultAsync(x => x.Id == orderId);
+            return order;
         }
 
         private async Task<bool> Save()
