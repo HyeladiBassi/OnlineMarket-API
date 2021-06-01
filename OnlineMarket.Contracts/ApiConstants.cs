@@ -13,6 +13,11 @@ namespace OnlineMarket.Contracts
             public const string SellerSignUp = Base + "signup/seller";
         }
 
+        public static class AdminRoutes 
+        {
+            public const string Base = BaseUrl + Version + "admin/";
+        }
+
         public static class UserRoutes
         {
             public const string Base = BaseUrl + Version + "user/{userId}";
