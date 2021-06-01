@@ -5,6 +5,9 @@ namespace OnlineMarket.Services.Interfaces
 {
     public interface IAdminService
     {
-         Task<SystemUser> AddModerator(SystemUser moderator);
+         Task<bool> AddModerator(SystemUser moderator);
+         Task<bool> DeleteModerator(string moderatorId);
+         Task<bool> AddCategory(Category category);
+        //  Task<bool> EditCategory(Category category);
     }
 }
