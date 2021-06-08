@@ -14,7 +14,7 @@ namespace OnlineMarket.Models
         public string Description { get; set; }
         public string WarehouseLocation { get; set; }
         public string  Status { get; set; }
-        public string Category { get; set; }
+        public Category Category { get; set; }
         public ICollection<Image> Images { get; set; }
         public SystemUser Seller { get; set; }
         public SystemUser ModeratedBy { get; set; }

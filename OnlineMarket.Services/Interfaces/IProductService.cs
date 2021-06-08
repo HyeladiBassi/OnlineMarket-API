@@ -26,9 +26,6 @@ namespace OnlineMarket.Services.Interfaces
         Task<bool> DeleteImage(int productId, int imageId);
         Task<bool> ImageExists(int imageId);
         Task<bool> MakeMain(int productId, int imageId);
-        Task<Category> UpdateCategory(int categoryId, CategoryUpdateDto updateDto);
-        Task<bool> AddCategory(Category createdCategory);
-        Task<bool> DeleteCategory(int categoryId);
 
     }
 }

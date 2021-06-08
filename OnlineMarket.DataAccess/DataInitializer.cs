@@ -1,11 +1,24 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Newtonsoft.Json;
 using OnlineMarket.Models;
+using JsonNet.ContractResolvers;
+using System;
+using System.Collections.Generic;
 
 namespace OnlineMarket.DataAccess
 {
     public class DataInitializer
     {
+        public static void Seed(string jsonData, UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager, DataContext context)
+        {
+            JsonSerializerSettings settings = new JsonSerializerSettings{
+                ContractResolver = new PrivateSetterContractResolver()
+            };
+            ICollection<Product> data = JsonConvert.DeserializeObject<ICollection<Product>>(jsonData, settings);
+            Console.WriteLine(data);
+            context.Products.AddRange(data);
+        }
         public static async Task SeedDatabase(UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager, DataContext context)
         {
             SystemRole buyerRole = new SystemRole
@@ -31,6 +44,38 @@ namespace OnlineMarket.DataAccess
                 Name = "moderator",
                 NormalizedName = "MODERATOR"
             };
+
+            Category category1 = new Category
+            {
+                Id = 1,
+                Name = "Technology",
+                ParentId = 0
+            };
+
+            Category category2 = new Category
+            {
+                Id = 2,
+                Name = "Fashion",
+                ParentId = 0
+            };
+
+            Category category3 = new Category
+            {
+                Id = 3,
+                Name = "Entertainment",
+                ParentId = 0
+            };
+
+            Category category4 = new Category
+            {
+                Id = 4,
+                Name = "Appliances",
+                ParentId = 0
+            };
+            await context.Categories.AddAsync(category1);
+            await context.Categories.AddAsync(category2);
+            await context.Categories.AddAsync(category3);
+            await context.Categories.AddAsync(category4);
 
             IdentityResult buyerResult = await roleManager.CreateAsync(buyerRole);
             IdentityResult adminResult = await roleManager.CreateAsync(adminRole);
@@ -92,19 +137,6 @@ namespace OnlineMarket.DataAccess
 
                 await userManager.CreateAsync(seller, "sellerpass!");
                 await userManager.AddToRoleAsync(seller, "seller");
-                Product sample1 = new Product
-                {
-                    Id = 15,
-                    Name = "Sample Product",
-                    Currency = "USD",
-                    Price = 500,
-                    Stock = 50,
-                    Description = "Sample description",
-                    Category = "Technology",
-                    Seller = seller
-                };
-                await context.Products.AddAsync(sample1);
-                await context.SaveChangesAsync();
 
                 SystemUser seller1 = new SystemUser
                 {
@@ -160,7 +192,114 @@ namespace OnlineMarket.DataAccess
                 };
                 await userManager.CreateAsync(seller5, "sellerpass!");
                 await userManager.AddToRoleAsync(seller5, "seller");
+
+                Product sample1 = new Product
+                {
+                    Id = 15,
+                    Name = "Phone",
+                    Currency = "TL",
+                    Price = 2000,
+                    Stock = 4,
+                    Description = "Mobile device",
+                    Category = category1,
+                    Seller = seller4,
+                    WarehouseLocation = "Famagusta",
+                    AverageRating = 0,
+                };
+
+                Product sample2 = new Product
+                {
+                    Id = 16,
+                    Name = "Laptop",
+                    Currency = "TL",
+                    Price = 1000,
+                    Stock = 2,
+                    Description = "Laptop lorem ipsum",
+                    Category = category1,
+                    Seller = seller4,
+                    WarehouseLocation = "Famagusta",
+                    AverageRating = 0,
+                };
+
+                Product sample3 = new Product
+                {
+                    Id = 17,
+                    Name = "Headphones",
+                    Currency = "TL",
+                    Price = 400,
+                    Stock = 5,
+                    Description = "Sample description",
+                    Category = category1,
+                    Seller = seller4,
+                    WarehouseLocation = "Famagusta",
+                    AverageRating = 0,
+                };
+
+                Product sample4 = new Product
+                {
+                    Id = 18,
+                    Name = "Blue Headphones",
+                    Currency = "TL",
+                    Price = 500,
+                    Stock = 50,
+                    Description = "Sample description",
+                    Category = category1,
+                    Seller = seller4,
+                    WarehouseLocation = "Famagusta",
+                    AverageRating = 0,
+                };
+
+                Product sample5 = new Product
+                {
+                    Id = 19,
+                    Name = "Bag",
+                    Currency = "TL",
+                    Price = 500,
+                    Stock = 50,
+                    Description = "Sample description",
+                    Category = category2,
+                    Seller = seller4,
+                    WarehouseLocation = "Famagusta",
+                    AverageRating = 0,
+                };
+
+                Product sample6 = new Product
+                {
+                    Id = 20,
+                    Name = "Monitor",
+                    Currency = "TL",
+                    Price = 500,
+                    Stock = 50,
+                    Description = "Sample description",
+                    Category = category1,
+                    Seller = seller3,
+                    WarehouseLocation = "Kyrenia",
+                    AverageRating = 0,
+                };
+
+                Product sample7 = new Product
+                {
+                    Id = 21,
+                    Name = "Book",
+                    Currency = "TL",
+                    Price = 500,
+                    Stock = 50,
+                    Description = "Book lorem ipsum",
+                    Category = category3,
+                    Seller = seller3,
+                    WarehouseLocation = "Kyrenia",
+                    AverageRating = 0,
+                };
+                await context.Products.AddAsync(sample1);
+                await context.Products.AddAsync(sample2);
+                await context.Products.AddAsync(sample3);
+                await context.Products.AddAsync(sample4);
+                await context.Products.AddAsync(sample5);
+                await context.Products.AddAsync(sample6);
+                await context.Products.AddAsync(sample7);
+                await context.SaveChangesAsync();
             }
+            
 
 
         }

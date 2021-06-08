@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,14 +27,16 @@ namespace OnlineMarket.API.Controllers
         private readonly IProductService _productService;
         private readonly UserManager<SystemUser> _userManager;
         private readonly IFileHelper _fileHelper;
+        private readonly ICategoryService _categoryService;
         private readonly IMapper _mapper;
 
-        public ProductController(IProductService productService, IMapper mapper, UserManager<SystemUser> userManager, IFileHelper fileHelper)
+        public ProductController(IProductService productService, IMapper mapper, UserManager<SystemUser> userManager, IFileHelper fileHelper, ICategoryService categoryService)
         {
             _productService = productService;
             _mapper = mapper;
             _userManager = userManager;
             _fileHelper = fileHelper;
+            _categoryService = categoryService;
         }
 
 
@@ -44,6 +47,10 @@ namespace OnlineMarket.API.Controllers
         [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetProductList([FromQuery] ProductResourceParameters parameters)
         {
+            if (string.IsNullOrEmpty(parameters.category))
+            {
+                parameters.category = "";
+            }
 
             switch (parameters.region)
             {
@@ -192,8 +199,13 @@ namespace OnlineMarket.API.Controllers
                 return Forbid("Unauthorized");
             }
 
+            Category category = await _categoryService.GetCategoryByName(createProductDto.Category);
+            if (category == null)
+            {
+                return BadRequest("Category does not exist");
+            }
             Product product = _mapper.Map<Product>(createProductDto);
-
+            product.Category = category;
             if (createProductDto.imageFiles != null && createProductDto.imageFiles.Count() > 0)
             {
                 SaveFileResult[] mediaFiles = await Task.WhenAll(createProductDto.imageFiles.Select(x => _fileHelper.SaveFile(x)));
@@ -216,6 +228,7 @@ namespace OnlineMarket.API.Controllers
         /// <summary>
         /// Puchase product
         /// </summary>
+        [Obsolete]
         [HttpPost(ApiConstants.ProductRoutes.GetProductById)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]

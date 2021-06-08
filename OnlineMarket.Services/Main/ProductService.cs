@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,11 +54,13 @@ namespace OnlineMarket.Services.Main
                 .Include(x => x.Images)
                 .Where(x => x.Status == "approved")
                 .Where(x => !x.IsDeleted)
+                .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
                 .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
                 .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
+
             return products;
         }
 
@@ -69,6 +72,7 @@ namespace OnlineMarket.Services.Main
                 .Where(x => x.Status == "approved")
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.WarehouseLocation == resourceParameters.region)
+                .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
@@ -93,9 +97,9 @@ namespace OnlineMarket.Services.Main
         public async Task<IEnumerable<Product>> GetProductList(ProductResourceParameters resourceParameters)
         {
             List<Product> productList = await _context.Products
-                .AsQueryable()
                 .Include(x => x.Seller)
                 .Where(x => x.Status == "approved")
+                .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
                 .ToListAsync();
 
             return productList;
@@ -104,7 +108,6 @@ namespace OnlineMarket.Services.Main
         public async Task<IEnumerable<Product>> GetRejectedProductList(ProductResourceParameters resourceParameters)
         {
             List<Product> productList = await _context.Products
-                .AsQueryable()
                 .Include(x => x.Seller)
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "rejected")
@@ -116,7 +119,6 @@ namespace OnlineMarket.Services.Main
         public async Task<IEnumerable<Product>> GetUnapprovedProductList(ProductResourceParameters resourceParameters)
         {
             List<Product> productList = await _context.Products
-                .AsQueryable()
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
                 .Where(x => !x.IsDeleted)
@@ -129,7 +131,6 @@ namespace OnlineMarket.Services.Main
         public async Task<PagedList<Product>> GetPagedProductListByUserId(string userId, ProductResourceParameters resourceParameters)
         {
             PagedList<Product> productList = await _context.Products
-                .AsQueryable()
                 .Include(x => x.Images)
                 .Where(x => x.Seller.Id == userId)
                 .Where(x => !x.IsDeleted)
@@ -158,7 +159,8 @@ namespace OnlineMarket.Services.Main
 
             if (updatedProduct.Category != null)
             {
-                product.Category = updatedProduct.Category;
+                Category category = await _context.Categories.FirstOrDefaultAsync(x => x.Name == updatedProduct.Category);
+                product.Category = category;
             }
 
             if (updatedProduct.Description != null)
@@ -263,7 +265,8 @@ namespace OnlineMarket.Services.Main
                 if (image.Id == imageId)
                 {
                     image.IsMain = true;
-                } else
+                }
+                else
                 {
                     image.IsMain = false;
                 }
@@ -278,50 +281,15 @@ namespace OnlineMarket.Services.Main
             if (approval)
             {
                 product.Status = "approved";
-            } else {
-                product.Status  = "rejected";
             }
-            SystemUser moderator  = await _userManager.FindByIdAsync(userId);
+            else
+            {
+                product.Status = "rejected";
+            }
+            SystemUser moderator = await _userManager.FindByIdAsync(userId);
             product.ModeratedBy = moderator;
             _context.Products.Update(product);
             return await Save();
-        }
-
-        public async Task<Category> UpdateCategory(int categoryId, CategoryUpdateDto updateDto)
-        {
-            Category existingCategory = await _context.Categories.FirstOrDefaultAsync(x => x.Id == categoryId);
-            if (updateDto.Name != null)
-            {
-                existingCategory.Name = updateDto.Name;
-            }
-
-            _context.Categories.Update(existingCategory);
-
-            if (await Save())
-            {
-                return existingCategory;
-            }
-            return null;
-        }
-
-        public async Task<bool> AddCategory(Category createdCategory)
-        {
-            await _context.AddAsync(createdCategory);
-            return await Save();
-        }
-
-        public async Task<bool> DeleteCategory(int categoryId)
-        {
-            Category category = await _context.Categories.SingleOrDefaultAsync(x => x.Id == categoryId);
-            _context.Categories.Remove(category);
-            return await Save();
-
-        }
-
-        public async Task<ICollection<Category>> GetCategories()
-        {
-            ICollection<Category> list = await _context.Categories.AsQueryable().ToListAsync();
-            return list;
         }
         private async Task<bool> Save()
         {

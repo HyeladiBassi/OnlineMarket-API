@@ -6,12 +6,16 @@ namespace OnlineMarket.Helpers.ResourceParameters
         public int pageNumber { get; set; } = 1;
 
         private int _pageSize = 10;
+        private string _searchQuery = "";
         public int pageSize
         {
             get => _pageSize;
             set => _pageSize = (value > maxPageSize) ? maxPageSize : value;
         }
-        public string searchQuery { get; set; }
+        public string searchQuery {
+            get => _searchQuery;
+            set => _searchQuery = (value == null) ? _searchQuery : value;
+         }
 
     }
 }

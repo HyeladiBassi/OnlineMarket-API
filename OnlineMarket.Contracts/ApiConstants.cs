@@ -18,6 +18,15 @@ namespace OnlineMarket.Contracts
             public const string Base = BaseUrl + Version + "admin/";
         }
 
+        public static class CategoryRoutes
+        {
+            public const string Base = BaseUrl + Version + "category";
+            public const string GetCategories = Base;
+            public const string CreateCategory = Base;
+            public const string UpdateCategory = Base + "/{categoryId}";
+            public const string DeleteCategory = Base + "/{categoryId}";
+        }
+
         public static class UserRoutes
         {
             public const string Base = BaseUrl + Version + "user/{userId}";

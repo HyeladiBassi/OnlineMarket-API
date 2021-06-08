@@ -22,14 +22,15 @@ namespace OnlineMarket.API.MappingProfiles
             #endregion
 
             #region Product
-            CreateMap<ProductCreateDto, Product>();
+            CreateMap<ProductCreateDto, Product>()
+                .ForPath(x => x.Category.Name, map => map.MapFrom(x => x.Category));
             CreateMap<Product, ProductViewDto>()
                 .ForMember(x => x.Name, map => map.MapFrom(x => x.Name))
                 .ForMember(x => x.Price, map => map.MapFrom(x => x.Price))
                 .ForMember(x => x.Description , map => map.MapFrom(x => x.Description))
                 .ForMember(x => x.WarehouseLocation, map => map.MapFrom(x => x.WarehouseLocation))
                 .ForMember(x => x.Stock, map => map.MapFrom(x => x.Stock))
-                .ForMember(x => x.Category, map => map.MapFrom(x => x.Category))
+                .ForMember(x => x.Category, map => map.MapFrom(x => x.Category.Name))
                 .ForMember(x => x.Seller, map => map.MapFrom(x => x.Seller))
                 .ForMember(x => x.AverageRating, map => map.MapFrom(x => x.AverageRating));
             #endregion
