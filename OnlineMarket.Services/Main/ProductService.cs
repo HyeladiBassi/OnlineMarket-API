@@ -52,6 +52,7 @@ namespace OnlineMarket.Services.Main
             PagedList<Product> products = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
+                .AsSingleQuery()
                 .Where(x => x.Status == "approved")
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
@@ -69,6 +70,7 @@ namespace OnlineMarket.Services.Main
             PagedList<Product> products = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
+                .AsSingleQuery()
                 .Where(x => x.Status == "approved")
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.WarehouseLocation == resourceParameters.region)
@@ -87,6 +89,7 @@ namespace OnlineMarket.Services.Main
                 .Include(x => x.Seller)
                 .Include(x => x.Reviews)
                 .Include(x => x.Images)
+                .AsSingleQuery()
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Id == productId)
                 .FirstOrDefaultAsync();
@@ -98,6 +101,7 @@ namespace OnlineMarket.Services.Main
         {
             List<Product> productList = await _context.Products
                 .Include(x => x.Seller)
+                .AsSingleQuery()
                 .Where(x => x.Status == "approved")
                 .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
                 .ToListAsync();
@@ -109,6 +113,7 @@ namespace OnlineMarket.Services.Main
         {
             List<Product> productList = await _context.Products
                 .Include(x => x.Seller)
+                .AsSingleQuery()
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "rejected")
                 .ToListAsync();
@@ -121,6 +126,7 @@ namespace OnlineMarket.Services.Main
             List<Product> productList = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
+                .AsSingleQuery()
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "pending")
                 .ToListAsync();
@@ -132,6 +138,7 @@ namespace OnlineMarket.Services.Main
         {
             PagedList<Product> productList = await _context.Products
                 .Include(x => x.Images)
+                .AsSingleQuery()
                 .Where(x => x.Seller.Id == userId)
                 .Where(x => !x.IsDeleted)
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
