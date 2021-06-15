@@ -80,6 +80,7 @@ namespace OnlineMarket.Services.Main
             List<Order> li = new List<Order>();
             PagedList<Transaction> transactions = await _context.Transactions
                 .Include(x => x.Orders)
+                .AsSingleQuery()
                 .WhereLtEq(x => x.TotalPrice, parameters.AmountLt)
                 .WhereGtEq(x => x.TotalPrice, parameters.AmountGt)
                 .ToPagedListAsync(parameters.pageNumber, parameters.pageSize);
@@ -103,6 +104,7 @@ namespace OnlineMarket.Services.Main
                 .Include(x => x.Orders)
                 .Include(x => x.Delivery)
                 .Include(x => x.Orders)
+                .AsSingleQuery()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             foreach (var order in transaction.Orders)
@@ -117,6 +119,7 @@ namespace OnlineMarket.Services.Main
             List<Order> li = new List<Order>();
             PagedList<Transaction> transactions = await _context.Transactions
                 .Include(x => x.Orders)
+                .AsSingleQuery()
                 .Where(x => x.Buyer.Id == userId)
                 .WhereLtEq(x => x.TotalPrice, parameters.AmountLt)
                 .WhereGtEq(x => x.TotalPrice, parameters.AmountGt)
