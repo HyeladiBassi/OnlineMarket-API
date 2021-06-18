@@ -49,6 +49,13 @@ namespace OnlineMarket.Services.Main
 
         public async Task<PagedList<Product>> GetPagedProductList(ProductResourceParameters resourceParameters)
         {
+            Category category = new Category();
+            category.Name = resourceParameters.category;
+            if (resourceParameters.category != "")
+            {
+                Category existingCategory = await GetCategoryAsync(resourceParameters.category);
+                category = existingCategory;
+            }
             PagedList<Product> products = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
@@ -57,6 +64,7 @@ namespace OnlineMarket.Services.Main
                 .Where(x => x.Status == "approved")
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
+                .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
@@ -68,6 +76,13 @@ namespace OnlineMarket.Services.Main
 
         public async Task<PagedList<Product>> GetPagedProductListFromRegion(ProductResourceParameters resourceParameters)
         {
+            Category category = new Category();
+            category.Name = resourceParameters.category;
+            if (resourceParameters.category != "")
+            {
+                Category existingCategory = await GetCategoryAsync(resourceParameters.category);
+                category = existingCategory;
+            }
             PagedList<Product> products = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Category)
@@ -77,6 +92,7 @@ namespace OnlineMarket.Services.Main
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.WarehouseLocation == resourceParameters.region)
                 .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
+                .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
@@ -116,11 +132,20 @@ namespace OnlineMarket.Services.Main
 
         public async Task<PagedList<Product>> GetRejectedProductList(ProductResourceParameters resourceParameters)
         {
+            Category category = new Category();
+            category.Name = resourceParameters.category;
+            if (resourceParameters.category != "")
+            {
+                Category existingCategory = await GetCategoryAsync(resourceParameters.category);
+                category = existingCategory;
+            }
             PagedList<Product> productList = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
                 .Include(x => x.Category)
                 .AsSingleQuery()
+                .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
+                .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "rejected")
                 .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
@@ -130,11 +155,20 @@ namespace OnlineMarket.Services.Main
 
         public async Task<PagedList<Product>> GetUnapprovedProductList(ProductResourceParameters resourceParameters)
         {
+            Category category = new Category();
+            category.Name = resourceParameters.category;
+            if (resourceParameters.category != "")
+            {
+                Category existingCategory = await GetCategoryAsync(resourceParameters.category);
+                category = existingCategory;
+            }
             PagedList<Product> productList = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
                 .Include(x => x.Category)
                 .AsSingleQuery()
+                .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
+                .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "pending")
                 .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
@@ -144,6 +178,13 @@ namespace OnlineMarket.Services.Main
 
         public async Task<PagedList<Product>> GetPagedProductListByUserId(string userId, ProductResourceParameters resourceParameters)
         {
+            Category category = new Category();
+            category.Name = resourceParameters.category;
+            if (resourceParameters.category != "")
+            {
+                Category existingCategory = await GetCategoryAsync(resourceParameters.category);
+                category = existingCategory;
+            }
             PagedList<Product> productList = await _context.Products
                 .Include(x => x.Images)
                 .Include(x => x.Category)
@@ -151,6 +192,7 @@ namespace OnlineMarket.Services.Main
                 .Where(x => x.Seller.Id == userId)
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
+                .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
@@ -307,6 +349,12 @@ namespace OnlineMarket.Services.Main
             product.ModeratedBy = moderator;
             _context.Products.Update(product);
             return await Save();
+        }
+
+        private async Task<Category> GetCategoryAsync(string name)
+        {
+            Category category = await _context.Categories.FirstOrDefaultAsync(x => x.Name == name);
+            return category;
         }
         private async Task<bool> Save()
         {
