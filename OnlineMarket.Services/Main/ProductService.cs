@@ -141,6 +141,7 @@ namespace OnlineMarket.Services.Main
                 .AsSingleQuery()
                 .Where(x => x.Seller.Id == userId)
                 .Where(x => !x.IsDeleted)
+                .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
