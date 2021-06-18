@@ -63,6 +63,7 @@ namespace OnlineMarket.Services.Main
             IEnumerable<ProductReview> reviews = await _context.Reviews
                 .AsSingleQuery()
                 .Include(x => x.Reviewer)
+                .Include(x => x.Images)
                 .Where(x => !x.IsDeleted)
                 .ToListAsync();
             return reviews;
