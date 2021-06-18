@@ -11,8 +11,8 @@ namespace OnlineMarket.Services.Interfaces
         Task<PagedList<Product>> GetPagedProductList(ProductResourceParameters resourceParameters);
         Task<PagedList<Product>> GetPagedProductListFromRegion(ProductResourceParameters resourceParameters);
         Task<IEnumerable<Product>> GetProductList(ProductResourceParameters resourceParameters);
-        Task<IEnumerable<Product>> GetRejectedProductList(ProductResourceParameters resourceParameters);
-        Task<IEnumerable<Product>> GetUnapprovedProductList(ProductResourceParameters resourceParameters);
+        Task<PagedList<Product>> GetRejectedProductList(ProductResourceParameters resourceParameters);
+        Task<PagedList<Product>> GetUnapprovedProductList(ProductResourceParameters resourceParameters);
         Task<PagedList<Product>> GetPagedProductListByUserId(string userId, ProductResourceParameters resourceParameters);
         Task<IEnumerable<Product>> GetProductListByUserId(string userId);
         Task<Product> GetProductById(int productId);

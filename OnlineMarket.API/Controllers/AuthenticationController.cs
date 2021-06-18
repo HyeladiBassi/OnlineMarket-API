@@ -53,7 +53,7 @@ namespace OnlineMarket.API.Controllers
         /// Buyer signup
         /// </summary>
         /// <param name="signUpDto"></param>
-        [HttpPost(ApiConstants.AuthRoutes.SignUp)]
+        [HttpPost(ApiConstants.AuthRoutes.BuyerSignUp)]
         [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> BuyerSignUp([FromBody] BuyerSignUpDto signUpDto)
@@ -67,6 +67,33 @@ namespace OnlineMarket.API.Controllers
             }
             SystemUser user = _mapper.Map<SystemUser>(signUpDto);
             ResponseWrapper<AuthResponse, ErrorTypes> result = await _authService.SignUp(user, signUpDto.password, "Buyer");
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            await _signInManager.SignInAsync(user, false);
+            return Ok(result.Result);
+        }
+
+
+        /// <summary>
+        /// Seller signup
+        /// </summary>
+        /// <param name="signUpDto"></param>
+        [HttpPost(ApiConstants.AuthRoutes.SellerSignUp)]
+        [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> SellerSignUp([FromBody] SellerSignUpDto signUpDto)
+        {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
+            bool emailValidationResult = _authService.IsValidEmail(signUpDto.email);
+
+            if (!emailValidationResult)
+            {
+                return BadRequest(errorBuilder.ChangeType(ErrorTypes.InvalidRequestBody).SetMessage("Email address is not valid!").Build());
+            }
+            SystemUser user = _mapper.Map<SystemUser>(signUpDto);
+            ResponseWrapper<AuthResponse, ErrorTypes> result = await _authService.SignUp(user, signUpDto.password, "Seller");
             if (!result.Success)
             {
                 return BadRequest(result.Error);

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using OnlineMarket.Helpers;
 using OnlineMarket.Models;
 
 namespace OnlineMarket.Services.Interfaces
@@ -7,7 +9,7 @@ namespace OnlineMarket.Services.Interfaces
     {
          Task<bool> AddModerator(SystemUser moderator);
          Task<bool> DeleteModerator(string moderatorId);
-         Task<bool> AddCategory(Category category);
-        //  Task<bool> EditCategory(Category category);
+         Task<ICollection<SystemUser>> GetAllUsers(string role);
+         Task<ICollection<SystemUser>> GetAllModerators();
     }
 }

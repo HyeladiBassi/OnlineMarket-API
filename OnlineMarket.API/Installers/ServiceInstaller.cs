@@ -30,6 +30,7 @@ namespace OnlineMarket.API.Installers
             services.AddScoped<IAuthHelper, AuthHelper>();
             services.AddScoped<IFileHelper, FileHelper>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITransactionService, TransactionService>();

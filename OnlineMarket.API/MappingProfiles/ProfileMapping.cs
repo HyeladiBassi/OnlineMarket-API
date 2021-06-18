@@ -19,6 +19,7 @@ namespace OnlineMarket.API.MappingProfiles
             #region Authentication
             CreateMap<BuyerSignUpDto, SystemUser>();
             CreateMap<SystemUser, SystemUserViewDto>();
+            CreateMap<ModeratorCreateDto, SystemUser>();
             #endregion
 
             #region Product

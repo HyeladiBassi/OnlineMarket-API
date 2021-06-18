@@ -9,13 +9,17 @@ namespace OnlineMarket.Contracts
         {
             public const string Base = BaseUrl + Version + "auth/";
             public const string SignIn = Base + "signin";
-            public const string SignUp = Base + "signup";
+            public const string BuyerSignUp = Base + "signup/buyer";
             public const string SellerSignUp = Base + "signup/seller";
         }
 
         public static class AdminRoutes 
         {
             public const string Base = BaseUrl + Version + "admin/";
+            public const string AddModerator = Base + "moderator";
+            public const string GetUsers = Base + "users";
+            public const string GetModerators = Base + "moderators";
+            public const string GetUserCount = Base + "users/count";
         }
 
         public static class CategoryRoutes

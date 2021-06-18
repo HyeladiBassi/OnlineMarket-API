@@ -114,30 +114,30 @@ namespace OnlineMarket.Services.Main
             return productList;
         }
 
-        public async Task<IEnumerable<Product>> GetRejectedProductList(ProductResourceParameters resourceParameters)
+        public async Task<PagedList<Product>> GetRejectedProductList(ProductResourceParameters resourceParameters)
         {
-            List<Product> productList = await _context.Products
+            PagedList<Product> productList = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
                 .Include(x => x.Category)
                 .AsSingleQuery()
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "rejected")
-                .ToListAsync();
+                .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
 
             return productList;
         }
 
-        public async Task<IEnumerable<Product>> GetUnapprovedProductList(ProductResourceParameters resourceParameters)
+        public async Task<PagedList<Product>> GetUnapprovedProductList(ProductResourceParameters resourceParameters)
         {
-            List<Product> productList = await _context.Products
+            PagedList<Product> productList = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
                 .Include(x => x.Category)
                 .AsSingleQuery()
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "pending")
-                .ToListAsync();
+                .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
 
             return productList;
         }

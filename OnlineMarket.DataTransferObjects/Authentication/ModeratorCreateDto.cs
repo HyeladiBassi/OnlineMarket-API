@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OnlineMarket.DataTransferObjects.Authentication
 {
-    public class SellerSignUpDto
+    public class ModeratorCreateDto
     {
         [Required(ErrorMessage = "First Name is required")]
         public string FirstName { get; set; }
@@ -20,7 +20,5 @@ namespace OnlineMarket.DataTransferObjects.Authentication
         [Required(ErrorMessage = "Password is required")]
         [StringLength(100, ErrorMessage = "Password should be between 5 and 100 characters", MinimumLength = 5)]
         public string password { get; set; }
-        public string IBAN { get; set; }
-        public string Bank { get; set; }
     }
 }

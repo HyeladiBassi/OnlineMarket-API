@@ -69,10 +69,19 @@ namespace OnlineMarket.API.Controllers
         [HttpPost(ApiConstants.TransactionRoutes.CreateTransaction)]
         public async Task<IActionResult> CreateTransaction(TransactionCreateDto createDto)
         {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
+            
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
                 return Forbid();
+            }
+            if (createDto.Orders.Count() <= 0)
+            {
+                return NotFound(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidRequestBody)
+                    .SetMessage("Order must have at least one product!")
+                    .Build());
             }
             SystemUser buyer = await _userService.GetUserById(userId);
             Delivery mappedDelivery = _mapper.Map<Delivery>(createDto.Delivery);
@@ -85,7 +94,7 @@ namespace OnlineMarket.API.Controllers
                 Product product = await _productService.GetProductById(orders[i].ProductId);
                 if (orders[i].Quantity > product.Stock)
                 {
-                    return BadRequest();
+                    return BadRequest("Not enough stock for product " + product.Name);
                 }
                 Order order = new Order
                 {

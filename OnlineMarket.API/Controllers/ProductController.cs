@@ -105,7 +105,7 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpGet(ApiConstants.ProductRoutes.UnapprovedProducts)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(IEnumerable<ProductViewDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUnapprovedProducts([FromQuery] ProductResourceParameters parameters)
         {
             string userId = HttpContext.GetUserIdFromToken();
@@ -114,10 +114,7 @@ namespace OnlineMarket.API.Controllers
                 return Forbid();
             }
 
-            IEnumerable<Product> products = await _productService.GetUnapprovedProductList(parameters);
-            IEnumerable<ProductViewDto> productsView = _mapper.Map<IEnumerable<ProductViewDto>>(products);
-
-            PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
+            PagedList<Product> pagedProducts = await _productService.GetUnapprovedProductList(parameters);
             PagingDto paging = pagedProducts.ExtractPaging();
 
             Paginate<ProductViewDto> result = new Paginate<ProductViewDto>
@@ -126,7 +123,7 @@ namespace OnlineMarket.API.Controllers
                 pagingInfo = paging
             };
 
-            return Ok(productsView);
+            return Ok(result);
         }
 
 
@@ -135,7 +132,7 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpGet(ApiConstants.ProductRoutes.RejectedProducts)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(IEnumerable<ProductViewDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Paginate<ProductViewDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRejectedProducts([FromQuery] ProductResourceParameters parameters)
         {
             string userId = HttpContext.GetUserIdFromToken();
@@ -144,10 +141,8 @@ namespace OnlineMarket.API.Controllers
                 return Forbid();
             }
 
-            IEnumerable<Product> products = await _productService.GetRejectedProductList(parameters);
-            IEnumerable<ProductViewDto> productsView = _mapper.Map<IEnumerable<ProductViewDto>>(products);
 
-            PagedList<Product> pagedProducts = await _productService.GetPagedProductList(parameters);
+            PagedList<Product> pagedProducts = await _productService.GetRejectedProductList(parameters);
             PagingDto paging = pagedProducts.ExtractPaging();
 
             Paginate<ProductViewDto> result = new Paginate<ProductViewDto>
@@ -156,7 +151,7 @@ namespace OnlineMarket.API.Controllers
                 pagingInfo = paging
             };
 
-            return Ok(productsView);
+            return Ok(result);
         }
 
 
