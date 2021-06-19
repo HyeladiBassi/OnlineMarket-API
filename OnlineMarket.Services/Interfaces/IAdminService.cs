@@ -7,9 +7,10 @@ namespace OnlineMarket.Services.Interfaces
 {
     public interface IAdminService
     {
-         Task<bool> AddModerator(SystemUser moderator);
+         Task<SystemUser> AddModerator(SystemUser moderator);
          Task<bool> DeleteModerator(string moderatorId);
          Task<ICollection<SystemUser>> GetAllUsers(string role);
          Task<ICollection<SystemUser>> GetAllModerators();
+         Task<bool> ModeratorExists(string id);
     }
 }

@@ -22,19 +22,19 @@ namespace OnlineMarket.Services.Main
             _userManager = userManager;
         }
 
-        public async Task<bool> AddModerator(SystemUser moderator)
+        public async Task<SystemUser> AddModerator(SystemUser moderator)
         {
             await _userManager.CreateAsync(moderator);
             await _userManager.AddToRoleAsync(moderator, "moderator");
-            return await Save();
+            return moderator;
         }
 
         public async Task<bool> DeleteModerator(string moderatorId)
         {
             SystemUser user = await _userManager.FindByIdAsync(moderatorId);
-            user.IsDeleted = true;
-            await _userManager.UpdateAsync(user);
-            return await Save();
+            IdentityResult result = await _userManager.RemoveFromRoleAsync(user, "moderator");
+            IdentityResult res = await _userManager.DeleteAsync(user);
+            return res.Succeeded && result.Succeeded;
         }
 
         public async Task<ICollection<SystemUser>> GetAllModerators()
@@ -47,6 +47,17 @@ namespace OnlineMarket.Services.Main
         {
             IList<SystemUser> users = await _userManager.GetUsersInRoleAsync(role);
             return users;
+        }
+
+        public async  Task<bool> ModeratorExists(string id)
+        {
+            SystemUser user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return false;
+            }
+            bool result = await _userManager.IsInRoleAsync(user, "moderator");
+            return result;
         }
 
         private async Task<bool> Save()

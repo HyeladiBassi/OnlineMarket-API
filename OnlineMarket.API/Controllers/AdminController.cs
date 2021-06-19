@@ -34,7 +34,7 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpGet(ApiConstants.AdminRoutes.GetUsers)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ICollection<SystemUserViewDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetUsers(string role)
@@ -60,7 +60,7 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpGet(ApiConstants.AdminRoutes.GetModerators)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ICollection<SystemUserViewDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetModerators()
         {
             ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
@@ -80,7 +80,7 @@ namespace OnlineMarket.API.Controllers
         /// </summary>
         [HttpPost(ApiConstants.AdminRoutes.AddModerator)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SystemUserViewDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddModerator(ModeratorCreateDto createDto)
         {
@@ -93,7 +93,40 @@ namespace OnlineMarket.API.Controllers
 
             SystemUser newModerator = _mapper.Map<SystemUser>(createDto);
 
-            bool result = await _adminService.AddModerator(newModerator);
+            SystemUser result = await _adminService.AddModerator(newModerator);
+
+            if (result != null)
+            {
+                SystemUserViewDto newUser = _mapper.Map<SystemUserViewDto>(result);
+                return Ok(newUser);
+            }
+
+            return BadRequest("Something went wrong!");
+        }
+
+
+        /// <summary>
+        /// Delete Moderator
+        /// </summary>
+        [HttpDelete(ApiConstants.AdminRoutes.AddModerator)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(APIError<ErrorTypes>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteModerator([FromParameter("moderatorId")] string moderatorId)
+        {
+            ErrorBuilder<ErrorTypes> errorBuilder = new ErrorBuilder<ErrorTypes>(ErrorTypes.InvalidRequestBody);
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Forbid();
+            }
+
+            if (!await _adminService.ModeratorExists(moderatorId))
+            {
+                return BadRequest(errorBuilder.ChangeType(ErrorTypes.InvalidRequestBody).SetMessage("The user is not a moderator").Build());
+            }
+
+            bool result = await _adminService.DeleteModerator(moderatorId);
 
             if (result)
             {
