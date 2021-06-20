@@ -15,5 +15,7 @@ namespace OnlineMarket.DataTransferObjects.SystemUser
         public string Area { get; set; }
         public string Address { get; set; }
         public string ExtraDetails { get; set; }
+        public string IBAN { get; set; }
+        public string Bank { get; set; }
     }
 }
