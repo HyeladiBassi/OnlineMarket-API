@@ -16,6 +16,6 @@ namespace OnlineMarket.Services.Interfaces
         Task<bool> CreateTransaction(string userId, Transaction transaction);
         Task<bool> DeleteTransaction(int id);
         Task<bool> DecreaseStock(int productId, int quantity);
-        // Task<ResponseWrapper<ICollection<OrderCreateDto>, ErrorTypes>> CheckProducts(ICollection<OrderCreateDto> orders);
+        Task<bool> UpdateTransactionStatus(int transactionId, string status);
     }
 }

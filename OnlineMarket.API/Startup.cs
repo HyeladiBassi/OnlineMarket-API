@@ -15,6 +15,7 @@ using Microsoft.OpenApi.Models;
 using OnlineMarket.API.Installers;
 using OnlineMarket.DataAccess;
 using OnlineMarket.Models;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace OnlineMarket.API
 {
@@ -43,8 +44,11 @@ namespace OnlineMarket.API
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "OnlineMarket.API Version 1"));
             }
+                app.UseSwaggerUI(setupAction => {
+                    setupAction.SwaggerEndpoint("/swagger/v1/swagger.json", "OnlineMarket.API Version 1");
+                    setupAction.DocExpansion(DocExpansion.None);
+                    });
 
             app.UseCors("MarketPolicy");
             app.UseHttpsRedirection();

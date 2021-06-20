@@ -66,6 +66,22 @@ namespace OnlineMarket.API.Controllers
             return Ok(mappedTransaction);
         }
 
+        [HttpPut(ApiConstants.TransactionRoutes.UpdateTransaction)]
+        public async Task<IActionResult> GetTransactionById([FromParameter("id")] int id, string status)
+        {
+            string userId = HttpContext.GetUserIdFromToken();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Forbid();
+            }
+            bool result = await _transactionService.UpdateTransactionStatus(id, status);
+            if (result)
+            {
+                return Ok("Status updated");
+            }
+            return BadRequest("Something went wrong!");
+        }
+
         [HttpPost(ApiConstants.TransactionRoutes.CreateTransaction)]
         public async Task<IActionResult> CreateTransaction(TransactionCreateDto createDto)
         {

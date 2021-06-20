@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,6 +20,7 @@ namespace OnlineMarket.Models
         public SystemUser Seller { get; set; }
         public SystemUser ModeratedBy { get; set; }
         public ICollection<ProductReview> Reviews { get; set; }
+        public DateTime ModeratedAt { get; set; }
         public double AverageRating { get; set; }
         public bool IsDeleted { get; set; }
         public Product()

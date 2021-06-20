@@ -17,6 +17,7 @@ namespace OnlineMarket.API.MappingProfiles
         {
 
             #region Authentication
+            CreateMap<SellerSignUpDto, SystemUser>();
             CreateMap<BuyerSignUpDto, SystemUser>();
             CreateMap<SystemUser, SystemUserViewDto>();
             CreateMap<ModeratorCreateDto, SystemUser>();
@@ -33,7 +34,8 @@ namespace OnlineMarket.API.MappingProfiles
                 .ForMember(x => x.Stock, map => map.MapFrom(x => x.Stock))
                 .ForMember(x => x.Category, map => map.MapFrom(x => x.Category.Name))
                 .ForMember(x => x.Seller, map => map.MapFrom(x => x.Seller))
-                .ForMember(x => x.AverageRating, map => map.MapFrom(x => x.AverageRating));
+                .ForMember(x => x.AverageRating, map => map.MapFrom(x => x.AverageRating))
+                .ForMember(x => x.Status, map => map.MapFrom(x => x.Status));
             #endregion
 
             #region Product Review

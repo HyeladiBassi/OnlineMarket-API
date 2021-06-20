@@ -60,6 +60,17 @@ namespace OnlineMarket.Services.Main
             return await Save();
         }
 
+        public async Task<bool> UpdateTransactionStatus(int transactionId, string status)
+        {
+            Transaction transaction = await _context.Transactions.FirstOrDefaultAsync(x => x.Id == transactionId);
+            if (status != null)
+            {
+                transaction.Status = status;
+            }
+            _context.Transactions.Update(transaction);
+            return await Save();
+        }
+
         public async Task<bool> DecreaseStock(int productId, int quantity)
         {
             Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
