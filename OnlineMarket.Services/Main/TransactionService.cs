@@ -149,7 +149,7 @@ namespace OnlineMarket.Services.Main
 
         private async Task<Order> GetOrder(int orderId)
         {
-            Order order = await _context.Orders.Include(x => x.Product).FirstOrDefaultAsync(x => x.Id == orderId);
+            Order order = await _context.Orders.Include(x => x.Product).Include(x => x.Product.Images).Include(x => x.Product.Seller).Include(x => x.Product.Category).FirstOrDefaultAsync(x => x.Id == orderId);
             return order;
         }
 
