@@ -75,6 +75,14 @@ namespace OnlineMarket.API.Controllers
             {
                 return StatusCode(403);
             }
+
+            if (!await _reviewService.CanReview(userId, id))
+            {
+                return BadRequest(errorBuilder
+                    .ChangeType(ErrorTypes.InvalidObjectId)
+                    .SetMessage("You can only review purchased products!")
+                    .Build());
+            }
             SystemUser user = await _userManager.FindByIdAsync(userId);
             ProductReview productReview = _mapper.Map<ProductReview>(createDto);            
 

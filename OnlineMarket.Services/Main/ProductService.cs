@@ -51,12 +51,30 @@ namespace OnlineMarket.Services.Main
         {
             Category category = new Category();
             category.Name = resourceParameters.category;
-            if (resourceParameters.category != "")
+            Category existingCategory = await GetCategoryAsync(resourceParameters.category);
+            category = existingCategory;
+            if (category != null)
             {
-                Category existingCategory = await GetCategoryAsync(resourceParameters.category);
-                category = existingCategory;
+
+                PagedList<Product> products = await _context.Products
+                    .Include(x => x.Seller)
+                    .Include(x => x.Images)
+                    .Include(x => x.Category)
+                    .AsSingleQuery()
+                    .Where(x => x.Status == "approved")
+                    .Where(x => !x.IsDeleted)
+                    .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
+                    .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
+                    .WhereGtEq(x => x.Price, resourceParameters.priceGt)
+                    .WhereLtEq(x => x.Price, resourceParameters.priceLt)
+                    .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
+                    .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
+                    .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
+                return products;
             }
-            PagedList<Product> products = await _context.Products
+            else
+            {
+                PagedList<Product> products = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Images)
                 .Include(x => x.Category)
@@ -64,26 +82,24 @@ namespace OnlineMarket.Services.Main
                 .Where(x => x.Status == "approved")
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
-                .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
                 .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
                 .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
-
-            return products;
+                return products;
+            }
         }
 
         public async Task<PagedList<Product>> GetPagedProductListFromRegion(ProductResourceParameters resourceParameters)
         {
             Category category = new Category();
             category.Name = resourceParameters.category;
-            if (resourceParameters.category != "")
+            Category existingCategory = await GetCategoryAsync(resourceParameters.category);
+            category = existingCategory;
+            if (resourceParameters.category != null)
             {
-                Category existingCategory = await GetCategoryAsync(resourceParameters.category);
-                category = existingCategory;
-            }
-            PagedList<Product> products = await _context.Products
+                PagedList<Product> products = await _context.Products
                 .Include(x => x.Seller)
                 .Include(x => x.Category)
                 .Include(x => x.Images)
@@ -98,7 +114,28 @@ namespace OnlineMarket.Services.Main
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
                 .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
                 .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
-            return products;
+                return products;
+            }
+            else
+            {
+                PagedList<Product> products = await _context.Products
+                .Include(x => x.Seller)
+                .Include(x => x.Category)
+                .Include(x => x.Images)
+                .AsSingleQuery()
+                .Where(x => x.Status == "approved")
+                .Where(x => !x.IsDeleted)
+                .Where(x => x.WarehouseLocation == resourceParameters.region)
+                .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
+                .WhereGtEq(x => x.Price, resourceParameters.priceGt)
+                .WhereLtEq(x => x.Price, resourceParameters.priceLt)
+                .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
+                .WhereLtEq(x => x.Stock, resourceParameters.stockLt)
+                .ToPagedListAsync(resourceParameters.pageNumber, resourceParameters.pageSize);
+                return products;
+
+            }
+
         }
 
         public async Task<Product> GetProductById(int productId)
@@ -144,7 +181,6 @@ namespace OnlineMarket.Services.Main
                 .Include(x => x.Images)
                 .Include(x => x.Category)
                 .AsSingleQuery()
-                .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
                 .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "rejected")
@@ -167,7 +203,6 @@ namespace OnlineMarket.Services.Main
                 .Include(x => x.Images)
                 .Include(x => x.Category)
                 .AsSingleQuery()
-                .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
                 .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Status == "pending")
@@ -192,7 +227,6 @@ namespace OnlineMarket.Services.Main
                 .Where(x => x.Seller.Id == userId)
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.Name.ToLower().Contains(resourceParameters.searchQuery))
-                .Where(x => x.Category.Id == category.Id || x.Category.ParentId == category.Id)
                 .WhereGtEq(x => x.Price, resourceParameters.priceGt)
                 .WhereLtEq(x => x.Price, resourceParameters.priceLt)
                 .WhereGtEq(x => x.Stock, resourceParameters.stockGt)
@@ -347,6 +381,7 @@ namespace OnlineMarket.Services.Main
             }
             SystemUser moderator = await _userManager.FindByIdAsync(userId);
             product.ModeratedBy = moderator;
+            product.ModeratedAt = DateTime.Now;
             _context.Products.Update(product);
             return await Save();
         }
@@ -359,6 +394,11 @@ namespace OnlineMarket.Services.Main
         private async Task<bool> Save()
         {
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        Task<Category> IProductService.GetCategoryAsync(string name)
+        {
+            throw new NotImplementedException();
         }
     }
 }

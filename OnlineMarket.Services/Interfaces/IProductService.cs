@@ -26,6 +26,6 @@ namespace OnlineMarket.Services.Interfaces
         Task<bool> DeleteImage(int productId, int imageId);
         Task<bool> ImageExists(int imageId);
         Task<bool> MakeMain(int productId, int imageId);
-
+        Task<Category> GetCategoryAsync(string name);
     }
 }

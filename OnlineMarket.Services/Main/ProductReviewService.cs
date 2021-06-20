@@ -105,13 +105,30 @@ namespace OnlineMarket.Services.Main
 
         private async Task<double> CalculateRating(int productId)
         {
-            var rating = 0.0;
+            double rating = 0.0;
             List<ProductReview> result = await _context.Reviews.Where(x => x.ProductId == productId).ToListAsync();
             foreach (ProductReview review in result)
             {
                 rating += review.Rating;
             }
             return (rating/result.Count());
+        }
+
+        public async Task<bool> CanReview(string userId, int productId)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
+            var transactions = await _context.Transactions.Include(x => x.Orders).Where(x => x.Buyer.Id == userId).ToListAsync();
+            foreach (var item in transactions)
+            {
+                foreach (var order in item.Orders)
+                {
+                    if (order.Product.Id == productId)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }
