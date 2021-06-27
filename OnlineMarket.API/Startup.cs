@@ -34,28 +34,29 @@ namespace OnlineMarket.API
 
             services.InstallServicesAssembly(Configuration);
             services.AddAutoMapper(typeof(Startup));
-            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager, DataContext context)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager, DataContext context)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
             }
-                app.UseSwaggerUI(setupAction => {
-                    setupAction.SwaggerEndpoint("/swagger/v1/swagger.json", "OnlineMarket.API Version 1");
-                    setupAction.DocExpansion(DocExpansion.None);
-                    });
+            app.UseSwagger();
+            app.UseSwaggerUI(setupAction =>
+            {
+                setupAction.SwaggerEndpoint("/swagger/v1/swagger.json", "OnlineMarket.API Version 1");
+                setupAction.DocExpansion(DocExpansion.None);
+            });
 
             app.UseCors("MarketPolicy");
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
             app.UseDefaultFiles();
-            
+
             app.UseRouting();
 
 

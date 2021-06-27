@@ -10,16 +10,6 @@ namespace OnlineMarket.DataAccess
 {
     public class DataInitializer
     {
-        public static void Seed(string jsonData, UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager, DataContext context)
-        {
-            JsonSerializerSettings settings = new JsonSerializerSettings
-            {
-                ContractResolver = new PrivateSetterContractResolver()
-            };
-            ICollection<Product> data = JsonConvert.DeserializeObject<ICollection<Product>>(jsonData, settings);
-            Console.WriteLine(data);
-            context.Products.AddRange(data);
-        }
         public static async Task SeedDatabase(UserManager<SystemUser> userManager, RoleManager<IdentityRole> roleManager, DataContext context)
         {
             SystemRole buyerRole = new SystemRole

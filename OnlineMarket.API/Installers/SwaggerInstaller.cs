@@ -12,6 +12,10 @@ namespace OnlineMarket.API.Installers
     {
         public void InstallServicesAssembly(IServiceCollection services, IConfiguration configuration)
         {
+
+            services.ConfigureSwaggerGen(setupAction => {
+                setupAction.DescribeAllParametersInCamelCase();
+            });
             services.AddSwaggerGen(setupAction =>
             {
                 setupAction.SwaggerDoc("v1", new OpenApiInfo

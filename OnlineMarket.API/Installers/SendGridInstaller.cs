@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OnlineMarket.API.Installers
 {
-    public class MvcInstaller : IInstaller
+    public class SendGridInstaller : IInstaller
     {
         public void InstallServicesAssembly(IServiceCollection services, IConfiguration configuration)
         {

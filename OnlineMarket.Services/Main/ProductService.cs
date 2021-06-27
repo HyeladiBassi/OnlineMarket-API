@@ -97,7 +97,7 @@ namespace OnlineMarket.Services.Main
             category.Name = resourceParameters.category;
             Category existingCategory = await GetCategoryAsync(resourceParameters.category);
             category = existingCategory;
-            if (resourceParameters.category != null)
+            if (category != null)
             {
                 PagedList<Product> products = await _context.Products
                 .Include(x => x.Seller)
