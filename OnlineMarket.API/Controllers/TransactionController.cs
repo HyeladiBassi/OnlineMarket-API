@@ -67,14 +67,14 @@ namespace OnlineMarket.API.Controllers
         }
 
         [HttpPut(ApiConstants.TransactionRoutes.UpdateTransaction)]
-        public async Task<IActionResult> GetTransactionById([FromParameter("id")] int id, string status)
+        public async Task<IActionResult> UpdateTransaction([FromParameter("id")] int id,TransactionUpdateDto updateDto)
         {
             string userId = HttpContext.GetUserIdFromToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
                 return Forbid();
             }
-            bool result = await _transactionService.UpdateTransactionStatus(id, status);
+            bool result = await _transactionService.UpdateTransactionStatus(id, updateDto.Status);
             if (result)
             {
                 return Ok("Status updated");
@@ -130,9 +130,9 @@ namespace OnlineMarket.API.Controllers
                 Delivery = mappedDelivery
             };
             transaction.Orders = newOrders;
-            bool result = await _transactionService.CreateTransaction(userId, transaction);
-            
-            return Ok(result);
+            var result = await _transactionService.CreateTransaction(userId, transaction);
+            TransactionViewDto mappedTransaction = _mapper.Map<TransactionViewDto>(result);
+            return Ok(mappedTransaction);
         }
     }
 }

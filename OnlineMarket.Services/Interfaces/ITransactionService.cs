@@ -13,7 +13,7 @@ namespace OnlineMarket.Services.Interfaces
         Task<PagedList<Transaction>> GetPagedTransactionList(TransactionResourceParameters parameters);
         Task<PagedList<Transaction>> GetTransactionListByUserId(string userId, TransactionResourceParameters parameters);
         Task<Transaction> GetTransactionById(int id);
-        Task<bool> CreateTransaction(string userId, Transaction transaction);
+        Task<Transaction> CreateTransaction(string userId, Transaction transaction);
         Task<bool> DeleteTransaction(int id);
         Task<bool> DecreaseStock(int productId, int quantity);
         Task<bool> UpdateTransactionStatus(int transactionId, string status);

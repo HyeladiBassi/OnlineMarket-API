@@ -40,7 +40,7 @@ namespace OnlineMarket.Services.Main
         //     }
         // }
 
-        public async Task<bool> CreateTransaction(string userId, Transaction transaction)
+        public async Task<Transaction> CreateTransaction(string userId, Transaction transaction)
         {
             foreach (var item in transaction.Orders)
             {
@@ -57,7 +57,8 @@ namespace OnlineMarket.Services.Main
                 entry.State = EntityState.Detached;
             }
             await _context.Transactions.AddAsync(transaction);
-            return await Save();
+            await Save();
+            return transaction;
         }
 
         public async Task<bool> UpdateTransactionStatus(int transactionId, string status)
