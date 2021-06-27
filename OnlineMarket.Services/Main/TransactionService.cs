@@ -115,7 +115,6 @@ namespace OnlineMarket.Services.Main
                 .Include(x => x.Buyer)
                 .Include(x => x.Orders)
                 .Include(x => x.Delivery)
-                .Include(x => x.Orders)
                 .AsSingleQuery()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -131,6 +130,7 @@ namespace OnlineMarket.Services.Main
             List<Order> li = new List<Order>();
             PagedList<Transaction> transactions = await _context.Transactions
                 .Include(x => x.Orders)
+                .Include(x => x.Delivery)
                 .AsSingleQuery()
                 .Where(x => x.Buyer.Id == userId)
                 .WhereLtEq(x => x.TotalPrice, parameters.AmountLt)
