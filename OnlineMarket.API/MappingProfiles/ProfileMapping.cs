@@ -19,7 +19,8 @@ namespace OnlineMarket.API.MappingProfiles
             #region Authentication
             CreateMap<SellerSignUpDto, SystemUser>();
             CreateMap<BuyerSignUpDto, SystemUser>();
-            CreateMap<SystemUser, SystemUserViewDto>();
+            CreateMap<SystemUser, SystemUserViewDto>()
+                .ForMember(x => x.Bank, map => map.MapFrom(x => x.BankName));
             CreateMap<ModeratorCreateDto, SystemUser>();
             #endregion
 

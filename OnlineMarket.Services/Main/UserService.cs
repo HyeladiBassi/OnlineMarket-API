@@ -97,6 +97,14 @@ namespace OnlineMarket.Services.Main
             {
                 existingUser.ExtraDetails = updateDto.ExtraDetails;
             }
+            if (updateDto.IBAN != null)
+            {
+                existingUser.IBAN = updateDto.IBAN;
+            }
+            if (updateDto.Bank != null)
+            {
+                existingUser.BankName = updateDto.Bank;
+            }
             await _userManager.UpdateAsync(existingUser);
             return existingUser;
         }
